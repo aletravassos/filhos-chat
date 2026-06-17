@@ -37,32 +37,68 @@
     flex-direction: column;
     overflow: hidden;
     border: 6px solid #FBBF24;
+    position: relative;
   }
   header {
     background: linear-gradient(120deg, var(--azul), var(--verde));
-    padding: 16px 18px;
+    padding: 13px 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     border-bottom: 6px solid var(--amarelo);
+    flex-shrink: 0;
   }
   .avatar {
-    width: 58px;
-    height: 58px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     background: #FFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 34px;
+    font-size: 32px;
     box-shadow: 0 0 0 4px var(--amarelo), 0 4px 8px rgba(0,0,0,0.25);
     flex-shrink: 0;
     animation: wiggle 2.5s ease-in-out infinite;
   }
   @keyframes wiggle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
-  .header-info { color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.25); }
-  .header-info h1 { margin: 0; font-size: 26px; font-weight: 900; }
-  .header-info p { margin: 2px 0 0; font-size: 15px; font-weight: 700; }
+  .header-info { color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.25); flex: 1; min-width: 0; }
+  .header-info h1 { margin: 0; font-size: 24px; font-weight: 900; }
+  .header-info p { margin: 1px 0 0; font-size: 14px; font-weight: 700; }
+  #study-btn {
+    background: rgba(255,255,255,0.25);
+    border: 2.5px solid rgba(255,255,255,0.6);
+    color: #fff;
+    border-radius: 22px;
+    padding: 8px 13px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    transition: background 0.2s, transform 0.1s;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+  }
+  #study-btn:hover { background: rgba(255,255,255,0.42); }
+  #study-btn.active { background: rgba(255,255,255,0.92); color: #1d4ed8; text-shadow: none; }
+
+  /* Kumon progress bar */
+  #kumon-bar {
+    display: none;
+    padding: 8px 14px 6px;
+    background: #FEF3C7;
+    border-bottom: 3px dashed var(--amarelo);
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  #kumon-bar.visible { display: flex; }
+  #kumon-bar-label { font-size: 13px; color: #92400e; white-space: nowrap; font-weight: 800; }
+  #kumon-track { flex: 1; height: 10px; background: rgba(251,191,36,0.3); border-radius: 8px; overflow: hidden; }
+  #kumon-fill { height: 100%; background: linear-gradient(90deg, var(--azul), var(--verde)); border-radius: 8px; transition: width 0.45s ease; width: 0%; }
+  #kumon-score { font-size: 13px; color: #92400e; white-space: nowrap; font-weight: 800; }
+
   #messages {
     flex: 1;
     overflow-y: auto;
@@ -109,9 +145,10 @@
   form {
     display: flex;
     gap: 10px;
-    padding: 16px;
+    padding: 14px 16px;
     background: #FFFBEB;
     border-top: 4px dashed var(--amarelo);
+    flex-shrink: 0;
   }
   #input {
     flex: 1;
@@ -123,8 +160,10 @@
     font-size: 18px;
     outline: none;
     font-weight: 700;
+    font-family: inherit;
   }
   #input:focus { border-color: var(--verde); }
+  #input:disabled { opacity: 0.5; }
   #send {
     width: 54px;
     height: 54px;
@@ -143,6 +182,87 @@
 
   #messages::-webkit-scrollbar { width: 6px; }
   #messages::-webkit-scrollbar-thumb { background: var(--amarelo); border-radius: 4px; }
+
+  /* Overlays */
+  #subject-overlay, #summary-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  #subject-overlay.visible, #summary-overlay.visible { display: flex; }
+
+  #subject-overlay {
+    background: linear-gradient(160deg, #EFF6FF 0%, #ECFDF5 100%);
+  }
+  #subject-overlay h2 { color: #1d4ed8; margin: 0 0 4px; font-size: 24px; font-weight: 900; }
+  .sub-desc { color: #065f46; font-size: 15px; margin: 0 0 18px; font-weight: 700; }
+  .subject-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 290px; }
+  .subject-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 20px;
+    border: 3px solid #FBBF24;
+    background: #FFFBEB;
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    box-shadow: 0 4px 0 #d97706;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .subject-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #d97706; background: #FEF3C7; }
+  .subject-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d97706; }
+  .s-icon { font-size: 26px; }
+  .s-info { flex: 1; }
+  .s-name { display: block; }
+  .s-nivel { display: block; font-size: 12px; color: #6b7280; margin-top: 2px; font-weight: 700; }
+  .overlay-cancel {
+    margin-top: 16px;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: 700;
+    transition: color 0.15s;
+  }
+  .overlay-cancel:hover { color: #374151; }
+
+  /* Summary overlay */
+  #summary-overlay {
+    background: linear-gradient(160deg, #FFFBEB 0%, #ECFDF5 100%);
+    gap: 4px;
+  }
+  #summary-overlay h2 { color: #1d4ed8; margin: 0 0 2px; font-size: 26px; font-weight: 900; }
+  .summary-stars { font-size: 44px; letter-spacing: 4px; margin: 6px 0; }
+  .summary-score { color: #065f46; font-size: 19px; font-weight: 800; margin: 2px 0; }
+  .summary-msg { color: #374151; font-size: 15px; font-weight: 700; margin: 4px 0 6px; }
+  .summary-level-msg { color: #d97706; font-size: 15px; font-weight: 900; margin-bottom: 14px; }
+  .summary-btn {
+    padding: 15px 36px;
+    border-radius: 28px;
+    border: none;
+    background: var(--laranja);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 0 #c2410c;
+    transition: transform 0.1s;
+  }
+  .summary-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c2410c; }
 </style>
 </head>
 <body>
@@ -154,10 +274,33 @@
       <h1>Theo Rex</h1>
       <p>🟢 pronto pra brincar!</p>
     </div>
+    <button id="study-btn">📚 Estudar</button>
   </header>
+
+  <div id="kumon-bar">
+    <span id="kumon-bar-label">Desafio 0/5</span>
+    <div id="kumon-track"><div id="kumon-fill"></div></div>
+    <span id="kumon-score">✅ 0 &nbsp;❌ 0</span>
+  </div>
 
   <div id="messages">
     <div class="msg system">🎈 Oi! Eu sou o Theo Rex! Escreve algo pra brincarmos! 🦖</div>
+  </div>
+
+  <div id="subject-overlay">
+    <h2>📚 Estudar hoje!</h2>
+    <p class="sub-desc">Qual aventura do saber vamos escolher? 🦖</p>
+    <div class="subject-btns" id="subject-btns"></div>
+    <button class="overlay-cancel" onclick="closeSubjectOverlay()">cancelar</button>
+  </div>
+
+  <div id="summary-overlay">
+    <h2 id="sum-title">Aventura concluída!</h2>
+    <div class="summary-stars" id="sum-stars"></div>
+    <div class="summary-score" id="sum-score"></div>
+    <div class="summary-msg" id="sum-msg"></div>
+    <div class="summary-level-msg" id="sum-level"></div>
+    <button class="summary-btn" onclick="closeSummary()">Continuar! 🚀</button>
   </div>
 
   <form id="form">
@@ -167,7 +310,7 @@
 </div>
 
 <script>
-const SYSTEM_PROMPT = `Você é o Theo Rex, um dinossaurinho amigo virtual super divertido e animado, que conversa com uma criança de 9 anos.
+const CHAT_SYSTEM_PROMPT = `Você é o Theo Rex, um dinossaurinho amigo virtual super divertido e animado, que conversa com uma criança de 9 anos.
 Seu jeito de falar:
 - Seja muito alegre, curioso e brincalhão, como um melhor amigo de aventuras.
 - Use frases curtas, simples e fáceis de entender para uma criança de 9 anos.
@@ -178,16 +321,192 @@ Seu jeito de falar:
 - Se a criança parecer triste, com medo ou contar algo preocupante, seja acolhedor e sugira com carinho que conte para um adulto de confiança (pai, mãe ou professor).
 - Responda sempre em português brasileiro, em mensagens curtas, divertidas e fáceis de ler.`;
 
-// Troque pela URL do seu worker depois do "wrangler deploy"
-// (ex.: 'https://claude-proxy-worker.SEU-USUARIO.workers.dev')
+const KUMON_SUBJECTS = [
+  { id: 'contas',    nome: 'Contas',    icon: '🔢' },
+  { id: 'palavras',  nome: 'Palavras',  icon: '✏️' },
+  { id: 'leitura',   nome: 'Leitura',   icon: '📖' },
+];
+
+const TOTAL_EXERCISES = 5;
 const WORKER_URL = 'https://claude-proxy-worker.aletravassos.workers.dev';
 
+function buildKumonPrompt(subjectNome, nivel) {
+  return `Você é o Theo Rex, um dinossaurinho aventureiro! Agora estamos na AVENTURA DO SABER! 🦖
+
+MATÉRIA: ${subjectNome}
+NÍVEL ATUAL: ${nivel}/10 (1 = super fácil, 10 = desafiador)
+
+REGRAS DA AVENTURA:
+1. Comece imediatamente com o Desafio 1/${TOTAL_EXERCISES}. Escreva "🦖 Desafio [N]/${TOTAL_EXERCISES}:" antes de cada questão.
+2. Use a pedagogia Waldorf: envolva cada exercício em uma mini-história, aventura ou situação imaginativa divertida. Faça a criança SENTIR a pergunta, não apenas calcular. Valorize o esforço e o processo, nunca a competição.
+3. Use linguagem simples e muitos emojis, adequado para 9 anos.
+4. Quando o Theo responder, avalie com muito entusiasmo! Se errou, explique de forma gentil e com uma metáfora ou história. Celebre mesmo os erros como parte da aventura.
+5. Ao final da sua avaliação, em linha separada, escreva exatamente: [OK] (se correto) ou [ERRO] (se incorreto). Depois, se ainda houver desafios, apresente o próximo imediatamente.
+6. No desafio ${TOTAL_EXERCISES}/${TOTAL_EXERCISES}, após o token [OK] ou [ERRO], comemore muito a aventura toda com o Theo! Não apresente novo desafio.
+7. Responda sempre em português brasileiro.`;
+}
+
 const messagesEl = document.getElementById('messages');
-const form = document.getElementById('form');
-const input = document.getElementById('input');
-const sendBtn = document.getElementById('send');
+const form       = document.getElementById('form');
+const input      = document.getElementById('input');
+const sendBtn    = document.getElementById('send');
+const studyBtn   = document.getElementById('study-btn');
+const kumonBar   = document.getElementById('kumon-bar');
 
 let conversationHistory = [];
+let kumon = null;
+
+// ── localStorage ──────────────────────────────────────────────
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem('kumon_theo') || '{}'); }
+  catch { return {}; }
+}
+function saveProgress(p) { localStorage.setItem('kumon_theo', JSON.stringify(p)); }
+function getNivel(id) { return loadProgress()[id]?.nivel || 1; }
+function advanceNivel(id) {
+  const p = loadProgress();
+  if (!p[id]) p[id] = { nivel: 1 };
+  if (p[id].nivel < 10) p[id].nivel++;
+  saveProgress(p);
+  return p[id].nivel;
+}
+
+// ── Kumon UI ──────────────────────────────────────────────────
+function openSubjectOverlay() {
+  const container = document.getElementById('subject-btns');
+  container.innerHTML = '';
+  KUMON_SUBJECTS.forEach(s => {
+    const nivel = getNivel(s.id);
+    const btn = document.createElement('button');
+    btn.className = 'subject-btn';
+    btn.innerHTML = `<span class="s-icon">${s.icon}</span><span class="s-info"><span class="s-name">${s.nome}</span><span class="s-nivel">Nível ${nivel}/10</span></span>`;
+    btn.onclick = () => startKumon(s.id, s.nome, s.icon, nivel);
+    container.appendChild(btn);
+  });
+  document.getElementById('subject-overlay').classList.add('visible');
+}
+
+function closeSubjectOverlay() {
+  document.getElementById('subject-overlay').classList.remove('visible');
+}
+
+async function startKumon(subjectId, subjectNome, subjectIcon, nivel) {
+  closeSubjectOverlay();
+  kumon = { subjectId, subjectNome, subjectIcon, nivel, count: 0, acertos: 0, erros: 0 };
+  studyBtn.classList.add('active');
+  studyBtn.textContent = `${subjectIcon} Encerrar`;
+  kumonBar.classList.add('visible');
+  updateKumonBar();
+  conversationHistory = [];
+  messagesEl.innerHTML = '';
+  addMessage(`📚 Aventura do Saber: ${subjectNome} • Nível ${nivel}/10`, 'system');
+
+  setInputLocked(true);
+  showTyping();
+
+  const trigger = [{ role: 'user', content: 'Vamos começar a aventura!' }];
+  try {
+    const reply = await fetchClaude(buildKumonPrompt(subjectNome, nivel), trigger);
+    hideTyping();
+    conversationHistory = trigger;
+    conversationHistory.push({ role: 'assistant', content: reply });
+    addMessage(reply, 'bot');
+  } catch (err) {
+    hideTyping();
+    addMessage('❌ Ops! Erro ao começar: ' + err.message, 'system');
+    endKumon();
+    return;
+  }
+  setInputLocked(false);
+}
+
+function updateKumonBar() {
+  document.getElementById('kumon-bar-label').textContent = `Desafio ${kumon.count}/${TOTAL_EXERCISES}`;
+  document.getElementById('kumon-fill').style.width = `${(kumon.count / TOTAL_EXERCISES) * 100}%`;
+  document.getElementById('kumon-score').innerHTML = `✅ ${kumon.acertos} &nbsp;❌ ${kumon.erros}`;
+}
+
+function stripMarker(text) {
+  return text.replace(/^\s*\[(OK|ERRO)\]\s*$/gim, '').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function parseMarker(text) {
+  const m = text.match(/\[(OK|ERRO)\]/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+function starsFromScore(acertos, total) {
+  if (total === 0) return 1;
+  const pct = acertos / total;
+  if (pct >= 0.95) return 5;
+  if (pct >= 0.80) return 4;
+  if (pct >= 0.60) return 3;
+  if (pct >= 0.40) return 2;
+  return 1;
+}
+
+function showSummary() {
+  const { acertos, erros, subjectNome, nivel, subjectId } = kumon;
+  const total = acertos + erros;
+  const pct   = total > 0 ? Math.round((acertos / total) * 100) : 0;
+  const stars = starsFromScore(acertos, total);
+  const starStr = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
+
+  let levelMsg = '';
+  if (pct >= 90 && nivel < 10) {
+    const novoNivel = advanceNivel(subjectId);
+    levelMsg = `🎉 UAU! Você passou pro Nível ${novoNivel}!`;
+  } else if (pct >= 90) {
+    levelMsg = '🏆 Nível máximo desbloqueado! Você é um gênio! 🦖';
+  } else {
+    levelMsg = 'Continue praticando pra avançar de nível (precisa de 90%+) 💪';
+  }
+
+  const msgs = [
+    'Cada tentativa é uma vitória! Continue explorando! 🦖',
+    'Bom esforço, aventureiro! Você vai arrasar! 🌟',
+    'Muito bem! Você está ficando mais forte! 💪',
+    'Quase perfeito! Você é incrível! 🚀',
+    'PERFEITO! Você é um dinossauro genial! 🦖⭐',
+  ];
+
+  document.getElementById('sum-title').textContent = `${subjectNome} concluída! 🎉`;
+  document.getElementById('sum-stars').textContent = starStr;
+  document.getElementById('sum-score').textContent = `${acertos} de ${total} certas (${pct}%)`;
+  document.getElementById('sum-msg').textContent = msgs[stars - 1];
+  document.getElementById('sum-level').textContent = levelMsg;
+  document.getElementById('summary-overlay').classList.add('visible');
+}
+
+function closeSummary() {
+  document.getElementById('summary-overlay').classList.remove('visible');
+  endKumon();
+}
+
+function endKumon() {
+  kumon = null;
+  studyBtn.classList.remove('active');
+  studyBtn.textContent = '📚 Estudar';
+  kumonBar.classList.remove('visible');
+  conversationHistory = [];
+  messagesEl.innerHTML = '';
+  addMessage('🎈 De volta ao chat! Oi! O que vamos fazer agora? 🦖', 'system');
+}
+
+studyBtn.addEventListener('click', () => {
+  if (kumon) {
+    if (confirm('Quer encerrar a aventura de estudos agora?')) showSummary();
+  } else {
+    openSubjectOverlay();
+  }
+});
+
+// ── Core ──────────────────────────────────────────────────────
+function setInputLocked(locked) {
+  input.disabled = locked;
+  sendBtn.disabled = locked;
+  if (!locked) input.focus();
+}
 
 function addMessage(text, role) {
   const div = document.createElement('div');
@@ -212,52 +531,70 @@ function hideTyping() {
   if (el) el.remove();
 }
 
+async function fetchClaude(systemPrompt, messages) {
+  const response = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages
+    })
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || response.statusText);
+  }
+  const data = await response.json();
+  return data.content?.[0]?.text || '...';
+}
+
 async function sendMessage(text) {
   addMessage(text, 'user');
-  conversationHistory.push({ role: 'user', content: text });
   input.value = '';
-  sendBtn.disabled = true;
+  setInputLocked(true);
   showTyping();
 
-  try {
-    const response = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages: conversationHistory
-      })
-    });
-
-    hideTyping();
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      addMessage('❌ Ops! Erro: ' + (errData.error?.message || response.statusText), 'system');
-      return;
+  if (kumon) {
+    kumon.count++;
+    updateKumonBar();
+    conversationHistory.push({ role: 'user', content: text });
+    try {
+      const reply = await fetchClaude(buildKumonPrompt(kumon.subjectNome, kumon.nivel), conversationHistory);
+      hideTyping();
+      const marker = parseMarker(reply);
+      if (marker === 'OK')   kumon.acertos++;
+      if (marker === 'ERRO') kumon.erros++;
+      updateKumonBar();
+      addMessage(stripMarker(reply), 'bot');
+      conversationHistory.push({ role: 'assistant', content: reply });
+      if (kumon.count >= TOTAL_EXERCISES) setTimeout(() => showSummary(), 2000);
+    } catch (err) {
+      hideTyping();
+      kumon.count--;
+      updateKumonBar();
+      addMessage('❌ Ops! Erro: ' + err.message, 'system');
     }
-
-    const data = await response.json();
-    const reply = data.content?.[0]?.text || '...';
-    addMessage(reply, 'bot');
-    conversationHistory.push({ role: 'assistant', content: reply });
-  } catch (err) {
-    hideTyping();
-    addMessage('❌ Não consegui me conectar: ' + err.message, 'system');
-  } finally {
-    sendBtn.disabled = false;
-    input.focus();
+  } else {
+    conversationHistory.push({ role: 'user', content: text });
+    try {
+      const reply = await fetchClaude(CHAT_SYSTEM_PROMPT, conversationHistory);
+      hideTyping();
+      addMessage(reply, 'bot');
+      conversationHistory.push({ role: 'assistant', content: reply });
+    } catch (err) {
+      hideTyping();
+      addMessage('❌ Não consegui me conectar: ' + err.message, 'system');
+    }
   }
+  setInputLocked(false);
 }
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const text = input.value.trim();
-  if (!text) return;
+  if (!text || input.disabled) return;
   sendMessage(text);
 });
 </script>
