@@ -61,8 +61,15 @@
     display: none; padding: 8px 14px; background: #14532d;
     color: #bbf7d0; font-size: 13px; font-weight: 800; text-align: center;
     border-bottom: 3px dashed #4ade80; flex-shrink: 0;
+    transition: background 0.5s ease, color 0.5s ease;
   }
   #kumon-banner.visible { display: block; }
+  #kumon-banner.warning {
+    background: linear-gradient(90deg, #78350f, #92400e);
+    color: #fef9c3; border-bottom-color: #fbbf24;
+    animation: warn-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes warn-pulse { 0%,100%{opacity:1;} 50%{opacity:0.82;} }
 
   #kumon-bar {
     display: none; padding: 8px 14px 6px; background: #FEF3C7;
@@ -189,6 +196,7 @@ const WORKER_URL      = 'https://claude-proxy-worker.aletravassos.workers.dev';
 const PROFILE_USER    = 'theo';
 const TOTAL_EXERCISES = 5;
 const SESSIONS_TO_ADV = 3;
+const KUMON_DURATION  = 15 * 60; // 15 minutos em segundos
 
 const KUMON_SUBJECTS = [
   { id: 'contas',   nome: 'Contas',   icon: '🔢' },
@@ -317,6 +325,38 @@ const kumonBanner = document.getElementById('kumon-banner');
 let conversationHistory = [];
 let kumon = null;
 
+// ── Timer ─────────────────────────────────────────────────────
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateBannerDisplay() {
+  if (!kumon) return;
+  document.getElementById('banner-text').textContent =
+    `${kumon.subjectNome} • Nível ${kumon.nivel} • ⏱️ ${formatTime(kumon.timeLeft)}`;
+}
+
+function startTimer() {
+  kumon.timeLeft = KUMON_DURATION;
+  updateBannerDisplay();
+  kumon.timerInterval = setInterval(() => {
+    if (!kumon) return;
+    kumon.timeLeft--;
+    updateBannerDisplay();
+    if (kumon.timeLeft === 120) {
+      kumonBanner.classList.add('warning');
+      addMessage('⚠️ Faltam só 2 minutos! Vamos terminar essa aventura, Theo! 🦖', 'system');
+    }
+    if (kumon.timeLeft <= 0) {
+      clearInterval(kumon.timerInterval);
+      addMessage('⏰ Tempo esgotado! Fim da aventura! Você arrasou, Theo! 🦖⭐', 'system');
+      setTimeout(() => showSummary(), 1500);
+    }
+  }, 1000);
+}
+
 // ── localStorage ──────────────────────────────────────────────
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem('kumon_theo') || '{}'); } catch { return {}; }
@@ -368,16 +408,17 @@ function closeSubjectOverlay() {
 
 async function startKumon(subjectId, subjectNome, subjectIcon, nivel) {
   closeSubjectOverlay();
-  kumon = { subjectId, subjectNome, subjectIcon, nivel, count: 0, acertos: 0, erros: 0 };
+  kumon = { subjectId, subjectNome, subjectIcon, nivel, count: 0, acertos: 0, erros: 0, timeLeft: KUMON_DURATION, timerInterval: null };
 
   headerEl.classList.add('kumon-mode');
   studyBtn.classList.add('active');
   studyBtn.textContent = '✏️ Estudar';
 
-  document.getElementById('banner-text').textContent = `${subjectNome} • Nível ${nivel}`;
   kumonBanner.classList.add('visible');
+  kumonBanner.classList.remove('warning');
   kumonBar.classList.add('visible');
   updateKumonBar();
+  startTimer();
 
   conversationHistory = [];
   messagesEl.innerHTML = '';
@@ -424,6 +465,8 @@ function starsFromScore(acertos, total) {
 }
 
 function showSummary() {
+  if (kumon?.timerInterval) { clearInterval(kumon.timerInterval); kumon.timerInterval = null; }
+  kumonBanner.classList.remove('warning');
   const { acertos, erros, subjectNome, nivel, subjectId } = kumon;
   const total = acertos + erros;
   const pct   = total ? Math.round((acertos / total) * 100) : 0;
@@ -456,11 +499,13 @@ function closeSummary() {
   endKumon();
 }
 function endKumon() {
+  if (kumon?.timerInterval) clearInterval(kumon.timerInterval);
   kumon = null;
   headerEl.classList.remove('kumon-mode');
   studyBtn.classList.remove('active');
   studyBtn.textContent = '📚 Kumon';
   kumonBanner.classList.remove('visible');
+  kumonBanner.classList.remove('warning');
   kumonBar.classList.remove('visible');
   conversationHistory = [];
   messagesEl.innerHTML = '';
