@@ -47,6 +47,10 @@
     gap: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     flex-shrink: 0;
+    transition: background 0.4s ease;
+  }
+  header.kumon-mode {
+    background: linear-gradient(120deg, #3b0764, #4c1d95);
   }
   .avatar {
     width: 48px;
@@ -80,6 +84,21 @@
   }
   #study-btn:hover { background: rgba(255,255,255,0.32); }
   #study-btn.active { background: rgba(255,255,255,0.9); color: var(--roxo-escuro); }
+
+  /* Kumon mode banner */
+  #kumon-banner {
+    display: none;
+    padding: 8px 16px;
+    background: linear-gradient(90deg, #3b0764, #4c1d95);
+    color: #e9d5ff;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid rgba(139,92,246,0.4);
+    flex-shrink: 0;
+  }
+  #kumon-banner.visible { display: block; }
 
   /* Kumon progress bar */
   #kumon-bar {
@@ -216,6 +235,7 @@
   .s-info { flex: 1; }
   .s-name { display: block; }
   .s-nivel { display: block; font-size: 11px; opacity: 0.6; margin-top: 1px; }
+  .s-sessoes { display: block; font-size: 10px; opacity: 0.45; margin-top: 1px; }
   .overlay-cancel {
     margin-top: 18px;
     background: none;
@@ -252,14 +272,16 @@
 <body>
 
 <div class="app">
-  <header>
+  <header id="header">
     <div class="avatar">🦄</div>
     <div class="header-info">
       <h1>Olivia</h1>
       <p><span class="status-dot"></span> online agora</p>
     </div>
-    <button id="study-btn">📚 Estudar</button>
+    <button id="study-btn">📚 Kumon</button>
   </header>
+
+  <div id="kumon-banner">📚 Modo Kumon Ativo — <span id="banner-text"></span></div>
 
   <div id="kumon-bar">
     <span id="kumon-bar-label">Exercício 0/10</span>
@@ -312,6 +334,7 @@ const KUMON_SUBJECTS = [
 ];
 
 const TOTAL_EXERCISES = 10;
+const SESSIONS_TO_ADVANCE = 3;
 const WORKER_URL = 'https://claude-proxy-worker.aletravassos.workers.dev';
 
 function buildKumonPrompt(subjectNome, nivel) {
@@ -322,8 +345,8 @@ NÍVEL ATUAL: ${nivel}/10 (1 = básico, 10 = avançado para o Ensino Médio)
 
 REGRAS DO MODO ESTUDO:
 1. Comece imediatamente com o Exercício 1/${TOTAL_EXERCISES}. Escreva "📚 Exercício [N]/${TOTAL_EXERCISES}:" antes de cada questão.
-2. Use a pedagogia Waldorf: conecte os exercícios à experiência de vida, valorize o processo e o esforço, use narrativa e contexto ao formular questões — nunca perguntas secas e descontextualizadas.
-3. Quando a estudante responder, avalie de forma calorosa e encorajadora. Se errou, explique com gentileza e clareza.
+2. Use a pedagogia Waldorf: conecte os exercícios à experiência de vida, valorize o processo e o esforço, use narrativa e contexto ao formular questões — nunca perguntas secas e descontextualizadas. A questão deve surgir de uma situação real ou história.
+3. Quando a estudante responder, avalie de forma calorosa e encorajadora. Se errou, explique com gentileza e uma metáfora ou analogia.
 4. Ao final da sua avaliação, em linha separada, escreva exatamente: [OK] (se correto) ou [ERRO] (se incorreto). Depois, se ainda houver exercícios, apresente o próximo imediatamente.
 5. No exercício ${TOTAL_EXERCISES}/${TOTAL_EXERCISES}, após o token [OK] ou [ERRO], escreva um parágrafo de celebração e incentivo para a sessão toda. Não apresente novo exercício.
 6. Responda sempre em português brasileiro.`;
@@ -334,7 +357,9 @@ const form       = document.getElementById('form');
 const input      = document.getElementById('input');
 const sendBtn    = document.getElementById('send');
 const studyBtn   = document.getElementById('study-btn');
+const headerEl   = document.getElementById('header');
 const kumonBar   = document.getElementById('kumon-bar');
+const kumonBanner = document.getElementById('kumon-banner');
 
 let conversationHistory = [];
 let kumon = null;
@@ -346,12 +371,26 @@ function loadProgress() {
 }
 function saveProgress(p) { localStorage.setItem('kumon_olivia', JSON.stringify(p)); }
 function getNivel(id) { return loadProgress()[id]?.nivel || 1; }
-function advanceNivel(id) {
+function getSessoes90(id) { return loadProgress()[id]?.sessoes90 || 0; }
+
+// Registra sessão; avança nível após SESSIONS_TO_ADVANCE sessões com 90%+
+// Retorna { novoNivel, avancou, sessoes90 }
+function registrarSessao(id, nivel, acertou90) {
   const p = loadProgress();
-  if (!p[id]) p[id] = { nivel: 1 };
-  if (p[id].nivel < 10) p[id].nivel++;
+  if (!p[id]) p[id] = { nivel: 1, sessoes90: 0 };
+  if (acertou90) {
+    p[id].sessoes90 = (p[id].sessoes90 || 0) + 1;
+    if (p[id].sessoes90 >= SESSIONS_TO_ADVANCE && p[id].nivel < 10) {
+      p[id].nivel++;
+      p[id].sessoes90 = 0;
+      saveProgress(p);
+      return { novoNivel: p[id].nivel, avancou: true, sessoes90: 0 };
+    }
+  } else {
+    // Não zera as sessões, apenas não incrementa
+  }
   saveProgress(p);
-  return p[id].nivel;
+  return { novoNivel: p[id].nivel, avancou: false, sessoes90: p[id].sessoes90 };
 }
 
 // ── Kumon UI ──────────────────────────────────────────────────
@@ -360,9 +399,16 @@ function openSubjectOverlay() {
   container.innerHTML = '';
   KUMON_SUBJECTS.forEach(s => {
     const nivel = getNivel(s.id);
+    const sessoes = getSessoes90(s.id);
     const btn = document.createElement('button');
     btn.className = 'subject-btn';
-    btn.innerHTML = `<span class="s-icon">${s.icon}</span><span class="s-info"><span class="s-name">${s.nome}</span><span class="s-nivel">Nível ${nivel}/10</span></span>`;
+    btn.innerHTML = `
+      <span class="s-icon">${s.icon}</span>
+      <span class="s-info">
+        <span class="s-name">${s.nome}</span>
+        <span class="s-nivel">Nível ${nivel}/10</span>
+        <span class="s-sessoes">${sessoes}/${SESSIONS_TO_ADVANCE} sessões 90%+ para avançar</span>
+      </span>`;
     btn.onclick = () => startKumon(s.id, s.nome, s.icon, nivel);
     container.appendChild(btn);
   });
@@ -376,13 +422,23 @@ function closeSubjectOverlay() {
 async function startKumon(subjectId, subjectNome, subjectIcon, nivel) {
   closeSubjectOverlay();
   kumon = { subjectId, subjectNome, subjectIcon, nivel, count: 0, acertos: 0, erros: 0 };
+
+  // Header visual
+  headerEl.classList.add('kumon-mode');
   studyBtn.classList.add('active');
-  studyBtn.textContent = `${subjectIcon} Encerrar`;
+  studyBtn.textContent = '✏️ Estudar';
+
+  // Banner
+  document.getElementById('banner-text').textContent = `${subjectNome} • Nível ${nivel}`;
+  kumonBanner.classList.add('visible');
+
+  // Barra de progresso
   kumonBar.classList.add('visible');
   updateKumonBar();
+
   conversationHistory = [];
   messagesEl.innerHTML = '';
-  addMessage(`📚 Modo Estudo: ${subjectNome} • Nível ${nivel}/10`, 'system');
+  addMessage(`📚 Modo Kumon Ativo — ${subjectNome} • Nível ${nivel}/10`, 'system');
 
   setInputLocked(true);
   showTyping();
@@ -435,14 +491,17 @@ function showSummary() {
   const stars = starsFromScore(acertos, total);
   const starStr = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
 
+  const { novoNivel, avancou, sessoes90 } = registrarSessao(subjectId, nivel, pct >= 90);
+
   let levelMsg = '';
-  if (pct >= 90 && nivel < 10) {
-    const novoNivel = advanceNivel(subjectId);
-    levelMsg = `🎉 Você avançou para o Nível ${novoNivel}!`;
-  } else if (pct >= 90) {
+  if (avancou) {
+    levelMsg = `🎉 Você avançou para o Nível ${novoNivel}! Incrível!`;
+  } else if (nivel >= 10 && pct >= 90) {
     levelMsg = '🏆 Nível máximo — você é incrível!';
+  } else if (pct >= 90) {
+    levelMsg = `💜 Ótimo! ${sessoes90}/${SESSIONS_TO_ADVANCE} sessões 90%+ para avançar de nível.`;
   } else {
-    levelMsg = 'Continue praticando para avançar de nível (precisa de 90%+)';
+    levelMsg = `Continue praticando! ${sessoes90}/${SESSIONS_TO_ADVANCE} sessões 90%+ acumuladas.`;
   }
 
   const msgs = [
@@ -468,8 +527,10 @@ function closeSummary() {
 
 function endKumon() {
   kumon = null;
+  headerEl.classList.remove('kumon-mode');
   studyBtn.classList.remove('active');
-  studyBtn.textContent = '📚 Estudar';
+  studyBtn.textContent = '📚 Kumon';
+  kumonBanner.classList.remove('visible');
   kumonBar.classList.remove('visible');
   conversationHistory = [];
   messagesEl.innerHTML = '';
