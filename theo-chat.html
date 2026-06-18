@@ -438,7 +438,7 @@ function closeSubjectOverlay() {
 async function startKumon(subjectId, subjectNome, subjectIcon, nivel, tabuadaAtual) {
   closeSubjectOverlay();
   const tab = tabuadaAtual || 1;
-  kumon = { subjectId, subjectNome, subjectIcon, nivel, tabuadaAtual: tab, count: 0, acertos: 0, erros: 0, timeLeft: KUMON_DURATION, timerInterval: null };
+  kumon = { subjectId, subjectNome, subjectIcon, nivel, tabuadaAtual: tab, count: 0, acertos: 0, erros: 0, timeLeft: KUMON_DURATION, timerInterval: null, startTime: Date.now() };
 
   headerEl.classList.add('kumon-mode');
   studyBtn.classList.add('active');
@@ -494,12 +494,22 @@ function starsFromScore(acertos, total) {
   return 1;
 }
 
+function saveSessionHistory(sessionData) {
+  fetch(`${WORKER_URL}/history/${PROFILE_USER}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sessionData),
+  }).catch(() => {});
+}
+
 function showSummary() {
   if (kumon?.timerInterval) { clearInterval(kumon.timerInterval); kumon.timerInterval = null; }
   kumonBanner.classList.remove('warning');
-  const { acertos, erros, subjectNome, nivel, subjectId, tabuadaAtual } = kumon;
+  const { acertos, erros, subjectNome, nivel, subjectId, tabuadaAtual, startTime } = kumon;
   const total = acertos + erros;
   const pct   = total ? Math.round((acertos / total) * 100) : 0;
+  const duracao = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+  saveSessionHistory({ date: new Date().toISOString(), materia: subjectId, nivel, tabuadaAtual, pct, acertos, total, duracao });
   const stars  = starsFromScore(acertos, total);
   const starStr = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
   const { novoNivel, avancou, sessoes90, tabuadaAtual: novaTabuada } = registrarSessao(subjectId, nivel, pct >= 90);

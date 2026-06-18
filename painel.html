@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Estudos 📊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --roxo: #8B5CF6;
+    --rosa: #EC4899;
+    --verde: #10B981;
+    --azul: #3B82F6;
+    --amarelo: #F59E0B;
+    --laranja: #F97316;
+    --fundo: #0f0f14;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--fundo);
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    color: #fff;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, var(--roxo), var(--rosa), var(--verde), var(--azul));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 28px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
+
+  .card {
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card.olivia {
+    background: linear-gradient(145deg, #1e0a35, #2d1148);
+    border: 1px solid rgba(139,92,246,0.3);
+    box-shadow: 0 8px 32px rgba(139,92,246,0.15);
+  }
+  .card.theo {
+    background: linear-gradient(145deg, #0a1e14, #0d2b1a);
+    border: 1px solid rgba(16,185,129,0.3);
+    box-shadow: 0 8px 32px rgba(16,185,129,0.15);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .olivia .avatar { background: radial-gradient(circle, #fff 0%, #FBCFE8 40%, #EC4899 100%); box-shadow: 0 0 0 2px rgba(236,72,153,0.4); }
+  .theo .avatar   { background: radial-gradient(circle, #fff 0%, #d1fae5 40%, #10B981 100%); box-shadow: 0 0 0 2px rgba(16,185,129,0.4); }
+  .card-name { font-size: 18px; font-weight: 700; }
+  .card-sub  { font-size: 12px; opacity: 0.55; margin-top: 1px; }
+  .olivia .card-name { color: #f3e8ff; }
+  .theo .card-name   { color: #d1fae5; }
+
+  .section { margin-bottom: 16px; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.45;
+    margin-bottom: 8px;
+  }
+
+  /* Tabuada progress */
+  .tabuada-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+  .tabuada-icon { font-size: 20px; }
+  .tabuada-info { flex: 1; }
+  .tabuada-title { font-size: 14px; font-weight: 700; }
+  .olivia .tabuada-title { color: #e9d5ff; }
+  .theo .tabuada-title   { color: #a7f3d0; }
+  .tabuada-sub { font-size: 11px; opacity: 0.5; margin-top: 1px; }
+  .nivel-pill {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .olivia .nivel-pill { background: rgba(139,92,246,0.3); color: #c4b5fd; }
+  .theo .nivel-pill   { background: rgba(16,185,129,0.25); color: #6ee7b7; }
+
+  /* Sessions 90% progress */
+  .sessoes-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .sessoes-dots { display: flex; gap: 5px; }
+  .sessoes-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.2);
+  }
+  .sessoes-dot.filled.olivia-dot { background: var(--rosa); border-color: var(--rosa); box-shadow: 0 0 5px var(--rosa); }
+  .sessoes-dot.filled.theo-dot   { background: var(--verde); border-color: var(--verde); box-shadow: 0 0 5px var(--verde); }
+  .sessoes-label { font-size: 11px; opacity: 0.5; }
+
+  /* Interests */
+  .interests { display: flex; flex-wrap: wrap; gap: 6px; }
+  .interest-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .olivia .interest-tag { background: rgba(236,72,153,0.18); color: #fbcfe8; border: 1px solid rgba(236,72,153,0.3); }
+  .theo .interest-tag   { background: rgba(16,185,129,0.15); color: #a7f3d0; border: 1px solid rgba(16,185,129,0.25); }
+  .no-interests { font-size: 12px; opacity: 0.35; }
+
+  /* Mensagem de progresso */
+  .progress-msg {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+  .olivia .progress-msg { background: rgba(139,92,246,0.12); color: #ddd6fe; border-left: 3px solid var(--roxo); }
+  .theo .progress-msg   { background: rgba(16,185,129,0.10); color: #a7f3d0; border-left: 3px solid var(--verde); }
+
+  /* Gráfico */
+  .chart-section {
+    max-width: 780px;
+    margin: 24px auto 0;
+    background: rgba(255,255,255,0.04);
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.6;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .chart-legend { display: flex; gap: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; opacity: 0.6; font-weight: 500; }
+  .legend-dot  { width: 8px; height: 8px; border-radius: 50%; }
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 90px;
+  }
+  .chart-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar-group {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    width: 100%;
+    justify-content: center;
+    height: 100%;
+  }
+  .bar {
+    width: 10px;
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+    transition: height 0.5s ease;
+  }
+  .bar.olivia-bar { background: linear-gradient(180deg, var(--rosa), var(--roxo)); }
+  .bar.theo-bar   { background: linear-gradient(180deg, var(--amarelo), var(--verde)); }
+  .chart-day-label {
+    font-size: 9px;
+    opacity: 0.4;
+    text-align: center;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .chart-empty {
+    text-align: center;
+    padding: 24px;
+    font-size: 13px;
+    opacity: 0.35;
+  }
+
+  /* Loading */
+  .loading-row { display: flex; gap: 8px; align-items: center; opacity: 0.45; font-size: 13px; padding: 8px 0; }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-top-color: rgba(255,255,255,0.6);
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .refresh-btn {
+    display: block;
+    margin: 24px auto 0;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.6);
+    padding: 9px 22px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(255,255,255,0.12); }
+</style>
+</head>
+<body>
+
+<h1>📊 Painel de Estudos</h1>
+<p class="subtitle" id="last-updated">carregando…</p>
+
+<div class="cards">
+  <div class="card olivia" id="card-olivia">
+    <div class="card-header">
+      <div class="avatar">🦄</div>
+      <div>
+        <div class="card-name">Olivia</div>
+        <div class="card-sub">14 anos • Tabuada mista aplicada</div>
+      </div>
+    </div>
+    <div class="loading-row"><div class="spinner"></div> Carregando dados…</div>
+  </div>
+
+  <div class="card theo" id="card-theo">
+    <div class="card-header">
+      <div class="avatar">🦖</div>
+      <div>
+        <div class="card-name">Theo</div>
+        <div class="card-sub">9 anos • Tabuada progressiva</div>
+      </div>
+    </div>
+    <div class="loading-row"><div class="spinner"></div> Carregando dados…</div>
+  </div>
+</div>
+
+<div class="chart-section" id="chart-section">
+  <div class="chart-title">
+    <span>SESSÕES — ÚLTIMOS 7 DIAS</span>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--rosa)"></div> Olivia</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--verde)"></div> Theo</div>
+    </div>
+  </div>
+  <div class="loading-row"><div class="spinner"></div> Carregando histórico…</div>
+</div>
+
+<button class="refresh-btn" onclick="loadAll()">↻ Atualizar</button>
+
+<script>
+const WORKER = 'https://claude-proxy-worker.aletravassos.workers.dev';
+const SESSIONS_TO_ADV = 3;
+
+const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(r.statusText);
+  return r.json();
+}
+
+// ── localStorage helpers (mesma lógica dos chats) ─────────────
+function getLocalProgress(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; }
+}
+function localNivel(key, id)     { return getLocalProgress(key)[id]?.nivel       || 1; }
+function localTabuada(key, id)   { return getLocalProgress(key)[id]?.tabuadaAtual || 1; }
+function localSessoes90(key, id) { return getLocalProgress(key)[id]?.sessoes90    || 0; }
+
+// ── Build card content ────────────────────────────────────────
+function buildCard(el, { user, profile, nivel, tabuadaAtual, sessoes90 }) {
+  const isOlivia = user === 'olivia';
+  const dotClass = isOlivia ? 'olivia-dot' : 'theo-dot';
+  const tabuadaLabel = isOlivia
+    ? `Nível ${nivel}/10 — revisão mista de todas as tabuadas`
+    : `Tabuada do ${tabuadaAtual} — Nível ${nivel}/10`;
+  const metaLabel = isOlivia
+    ? `${sessoes90}/${SESSIONS_TO_ADV} sessões 90%+ para subir de nível`
+    : nivel < 10
+      ? `${sessoes90}/${SESSIONS_TO_ADV} sessões 90%+ para Nível ${nivel + 1}`
+      : `${sessoes90}/${SESSIONS_TO_ADV} sessões 90%+ para tabuada do ${Math.min(tabuadaAtual + 1, 10)}`;
+
+  // Mensagem de progresso
+  const progressMsg = buildProgressMsg(user, nivel, tabuadaAtual, sessoes90);
+
+  // Interesses
+  const interestHTML = buildInterests(user, profile);
+
+  const dotsHTML = Array.from({ length: SESSIONS_TO_ADV }, (_, i) =>
+    `<div class="sessoes-dot ${i < sessoes90 ? 'filled ' + dotClass : ''}"></div>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="card-header">
+      <div class="avatar">${isOlivia ? '🦄' : '🦖'}</div>
+      <div>
+        <div class="card-name">${isOlivia ? 'Olivia' : 'Theo'}</div>
+        <div class="card-sub">${isOlivia ? '14 anos • Tabuada mista aplicada' : '9 anos • Tabuada progressiva'}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Tabuada</div>
+      <div class="tabuada-row">
+        <div class="tabuada-icon">🔢</div>
+        <div class="tabuada-info">
+          <div class="tabuada-title">${isOlivia ? 'Todas as tabuadas' : `Tabuada do ${tabuadaAtual}`}</div>
+          <div class="tabuada-sub">${tabuadaLabel}</div>
+        </div>
+        <div class="nivel-pill">Nível ${nivel}</div>
+      </div>
+      <div class="sessoes-row">
+        <div class="sessoes-dots">${dotsHTML}</div>
+        <div class="sessoes-label">${metaLabel}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Interesses detectados</div>
+      ${interestHTML}
+    </div>
+
+    <div class="section">
+      <div class="section-label">Progresso</div>
+      <div class="progress-msg">${progressMsg}</div>
+    </div>
+  `;
+}
+
+function buildInterests(user, profile) {
+  if (!profile) return '<div class="no-interests">Nenhum interesse registrado ainda.</div>';
+
+  const CATS = user === 'olivia'
+    ? { artistas: '🎵', musicas: '🎶', series: '📺', redessociais: '📱', moda: '👗' }
+    : { jogos: '🎮', personagens: '⚔️', dinossauros: '🦕', herois: '🦸', musicas: '🎵', series: '📺' };
+
+  const tags = [];
+  for (const [cat, icon] of Object.entries(CATS)) {
+    const items = profile[cat];
+    if (items?.length) {
+      items.slice(0, 3).forEach(item => tags.push(`${icon} ${item}`));
+    }
+  }
+  if (!tags.length) return '<div class="no-interests">Nenhum interesse registrado ainda.</div>';
+  return '<div class="interests">' + tags.map(t => `<span class="interest-tag">${t}</span>`).join('') + '</div>';
+}
+
+function buildProgressMsg(user, nivel, tabuadaAtual, sessoes90) {
+  if (user === 'olivia') {
+    if (nivel >= 9) return `🏆 Olivia está no nível máximo (${nivel}/10)! Ela domina tabuada e já trabalha com frações e equações. Impressionante! 💜`;
+    if (nivel >= 7) return `🌟 Nível ${nivel}/10 — Olivia já conecta tabuada com porcentagem e situações reais. Ótima evolução!`;
+    if (nivel >= 4) return `📈 Nível ${nivel}/10 — ela está no passo das aplicações práticas. Continua crescendo!`;
+    return `🌱 Nível ${nivel}/10 — início da jornada! Cada sessão consolida a base da tabuada.`;
+  } else {
+    if (tabuadaAtual >= 9 && nivel >= 8) return `🏆 Theo está dominando as últimas tabuadas! Nível ${nivel} na tabuada do ${tabuadaAtual}. Quase completo! 🦖`;
+    if (tabuadaAtual >= 5) return `🚀 Tabuada do ${tabuadaAtual}, Nível ${nivel}! Theo está na metade da jornada — muito bem! 🦖`;
+    if (tabuadaAtual >= 3) return `📈 Tabuada do ${tabuadaAtual}, Nível ${nivel} — aventura evoluindo bem! Continue assim, Theo!`;
+    return `🌱 Tabuada do ${tabuadaAtual}, Nível ${nivel} — primeiros passos na aventura das multiplicações! 🦖`;
+  }
+}
+
+// ── Chart ──────────────────────────────────────────────────────
+function buildChart(oliviaHistory, theoHistory) {
+  const section = document.getElementById('chart-section');
+
+  // Build last-7-days buckets
+  const today = new Date();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (6 - i));
+    return d;
+  });
+
+  function countByDay(history, days) {
+    return days.map(day => {
+      const ymd = day.toISOString().slice(0, 10);
+      return history.filter(s => s.date && s.date.startsWith(ymd)).length;
+    });
+  }
+
+  const oliviaCounts = countByDay(oliviaHistory, days);
+  const theoCounts   = countByDay(theoHistory, days);
+  const maxCount = Math.max(...oliviaCounts, ...theoCounts, 1);
+
+  const hasAny = oliviaCounts.some(n => n > 0) || theoCounts.some(n => n > 0);
+
+  if (!hasAny) {
+    section.innerHTML = `
+      <div class="chart-title">
+        <span>SESSÕES — ÚLTIMOS 7 DIAS</span>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rosa)"></div> Olivia</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--verde)"></div> Theo</div>
+        </div>
+      </div>
+      <div class="chart-empty">📭 Nenhuma sessão nos últimos 7 dias ainda.<br>Complete uma sessão Kumon para ver o gráfico!</div>`;
+    return;
+  }
+
+  const colsHTML = days.map((day, i) => {
+    const oH = Math.round((oliviaCounts[i] / maxCount) * 72);
+    const tH = Math.round((theoCounts[i] / maxCount) * 72);
+    const label = DIAS_PT[day.getDay()];
+    const isToday = day.toDateString() === today.toDateString();
+    return `
+      <div class="chart-col">
+        <div class="bar-group">
+          <div class="bar olivia-bar" style="height:${Math.max(oH, oliviaCounts[i] > 0 ? 4 : 0)}px" title="Olivia: ${oliviaCounts[i]} sessão(ões)"></div>
+          <div class="bar theo-bar"   style="height:${Math.max(tH,   theoCounts[i] > 0 ? 4 : 0)}px" title="Theo: ${theoCounts[i]} sessão(ões)"></div>
+        </div>
+        <div class="chart-day-label" style="${isToday ? 'opacity:.9;font-weight:700' : ''}">${label}</div>
+      </div>`;
+  }).join('');
+
+  section.innerHTML = `
+    <div class="chart-title">
+      <span>SESSÕES — ÚLTIMOS 7 DIAS</span>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--rosa)"></div> Olivia</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--verde)"></div> Theo</div>
+      </div>
+    </div>
+    <div class="chart-grid">${colsHTML}</div>`;
+}
+
+// ── Load all ──────────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('last-updated').textContent = 'carregando…';
+
+  // Reset cards to loading state
+  const cardO = document.getElementById('card-olivia');
+  const cardT = document.getElementById('card-theo');
+  [cardO, cardT].forEach(c => {
+    const header = c.querySelector('.card-header').outerHTML;
+    c.innerHTML = header + '<div class="loading-row"><div class="spinner"></div> Carregando dados…</div>';
+  });
+
+  const chartSection = document.getElementById('chart-section');
+  chartSection.innerHTML = `
+    <div class="chart-title">
+      <span>SESSÕES — ÚLTIMOS 7 DIAS</span>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--rosa)"></div> Olivia</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--verde)"></div> Theo</div>
+      </div>
+    </div>
+    <div class="loading-row"><div class="spinner"></div> Carregando histórico…</div>`;
+
+  try {
+    const [oliviaProfile, theoProfile, oliviaHistory, theoHistory] = await Promise.all([
+      fetchJSON(`${WORKER}/profile/olivia`),
+      fetchJSON(`${WORKER}/profile/theo`),
+      fetchJSON(`${WORKER}/history/olivia`),
+      fetchJSON(`${WORKER}/history/theo`),
+    ]);
+
+    // Progress from localStorage (source of truth for levels)
+    const oliviaNivel     = localNivel('kumon_olivia', 'tabuada');
+    const oliviaSessoes90 = localSessoes90('kumon_olivia', 'tabuada');
+    const theoNivel       = localNivel('kumon_theo', 'tabuada');
+    const theoTabuada     = localTabuada('kumon_theo', 'tabuada');
+    const theoSessoes90   = localSessoes90('kumon_theo', 'tabuada');
+
+    buildCard(cardO, { user: 'olivia', profile: oliviaProfile, nivel: oliviaNivel, tabuadaAtual: null, sessoes90: oliviaSessoes90 });
+    buildCard(cardT, { user: 'theo',   profile: theoProfile,   nivel: theoNivel,   tabuadaAtual: theoTabuada, sessoes90: theoSessoes90 });
+
+    buildChart(oliviaHistory, theoHistory);
+
+    const now = new Date();
+    document.getElementById('last-updated').textContent =
+      `Atualizado às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} de ${now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+
+  } catch (err) {
+    document.getElementById('last-updated').textContent = '⚠️ Erro ao carregar: ' + err.message;
+  }
+}
+
+loadAll();
+</script>
+</body>
+</html>

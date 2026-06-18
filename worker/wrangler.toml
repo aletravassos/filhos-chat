@@ -1,0 +1,8 @@
+name = "claude-proxy-worker"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "PROFILES"
+id = "a23c288c933a46dda437fc40ab7b5b9a"
