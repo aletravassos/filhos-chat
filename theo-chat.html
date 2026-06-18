@@ -199,9 +199,7 @@ const SESSIONS_TO_ADV = 3;
 const KUMON_DURATION  = 15 * 60; // 15 minutos em segundos
 
 const KUMON_SUBJECTS = [
-  { id: 'contas',   nome: 'Contas',   icon: '🔢' },
-  { id: 'palavras', nome: 'Palavras', icon: '✏️' },
-  { id: 'leitura',  nome: 'Leitura',  icon: '📖' },
+  { id: 'tabuada', nome: 'Tabuada', icon: '🔢' },
 ];
 
 // ── Detecção de interesses para perfil ───────────────────────
@@ -294,22 +292,41 @@ Seu jeito de falar:
 - Responda sempre em português brasileiro, em mensagens curtas, divertidas e fáceis de ler.${profileContext()}`;
 }
 
-function buildKumonPrompt(subjectNome, nivel) {
-  return `Você é o Theo Rex, um dinossaurinho aventureiro! Agora estamos na AVENTURA DO SABER! 🦖
+function buildKumonPrompt(subjectNome, nivel, tabuadaAtual) {
+  const tab = tabuadaAtual || 1;
+  const escopos = [
+    '',
+    `apenas ${tab}×1 e ${tab}×2`,
+    `${tab}×1 até ${tab}×3`,
+    `${tab}×1 até ${tab}×4`,
+    `${tab}×1 até ${tab}×5`,
+    `${tab}×1 até ${tab}×6`,
+    `${tab}×1 até ${tab}×7`,
+    `${tab}×1 até ${tab}×8`,
+    `${tab}×1 até ${tab}×9`,
+    `${tab}×1 até ${tab}×10 em sequência`,
+    `tabuada do ${tab} completa, perguntas embaralhadas aleatoriamente`,
+  ];
+  return `Você é o Theo Rex, um dinossaurinho aventureiro! Agora estamos na AVENTURA DA TABUADA! 🦖🔢
 
-MATÉRIA: ${subjectNome}
-NÍVEL ATUAL: ${nivel}/10 (1 = super fácil, 10 = desafiador)
+TABUADA ATUAL: do ${tab}
+NÍVEL DE DOMÍNIO: ${nivel}/10
+ESCOPO DESTA SESSÃO: ${escopos[nivel]}
+(USE APENAS multiplicações da tabuada do ${tab} dentro deste escopo — não saia dele!)
 
 REGRAS DA AVENTURA:
 1. Comece imediatamente com o Desafio 1/${TOTAL_EXERCISES}. Escreva "🦖 Desafio [N]/${TOTAL_EXERCISES}:" antes de cada questão.
-2. Use a pedagogia Waldorf: envolva cada exercício em uma mini-história ou aventura imaginativa divertida. A questão deve emergir naturalmente da história. Faça a criança SENTIR a situação, não apenas resolver. Valorize o esforço e o processo, nunca a competição.
-3. Use os jogos favoritos como ponte pedagógica: Minecraft para matemática e geometria (construir blocos, medir áreas, calcular recursos), Mario para contagem e velocidade (moedas, fases), Pokémon para categorização e português (tipos, nomes, leitura de descrições).
-4. Use linguagem muito simples, colorida e cheia de emojis, adequado para 9 anos.
-5. Quando a criança responder, avalie com muito entusiasmo! Se errou, explique de forma gentil com uma metáfora ou continuação da história. Celebre o esforço mesmo quando erra.
-6. Ao final da sua avaliação, em linha separada, escreva exatamente: [OK] (se correto) ou [ERRO] (se incorreto). Depois, se ainda houver desafios, apresente o próximo imediatamente.
-7. No desafio ${TOTAL_EXERCISES}/${TOTAL_EXERCISES}, após o token [OK] ou [ERRO], comemore muito a aventura toda! Não apresente novo desafio.
-8. Se a criança fizer uma pergunta fora da matéria: responda brevemente (1-2 frases) com muito entusiasmo, depois redirecione conectando o interesse ao conteúdo usando os jogos como ponte.
-9. Responda sempre em português brasileiro.${profileContext()}`;
+2. Use a pedagogia Waldorf: envolva CADA desafio em uma mini-história ou aventura imaginativa. A multiplicação deve surgir naturalmente da narrativa. Exemplos de contextos que o Theo ama:
+   - Minecraft: "Você está construindo uma muralha com ${tab} fileiras de blocos de pedra..."
+   - Mario: "${tab} canos mágicos, cada um com X moedas escondidas lá dentro..."
+   - Pokémon: "Você encontrou ${tab} grupos de X Pokémon na Rota 1..."
+   Varie os contextos ao longo dos ${TOTAL_EXERCISES} desafios!
+3. Use linguagem super animada, emojis e entusiasmo, adequada para 9 anos.
+4. Quando a criança responder, avalie com muito entusiasmo! Se errou, explique gentilmente com a continuação da história. Celebre sempre o esforço.
+5. Ao final da avaliação, em linha separada, escreva exatamente: [OK] (se correto) ou [ERRO] (se incorreto). Depois, apresente o próximo desafio imediatamente se ainda houver.
+6. No desafio ${TOTAL_EXERCISES}/${TOTAL_EXERCISES}, após [OK] ou [ERRO], comemore muito a aventura toda! Não apresente novo desafio.
+7. Se a criança fizer pergunta fora da tabuada: responda brevemente (1-2 frases) e redirecione conectando ao contexto da aventura.
+8. Responda sempre em português brasileiro.${profileContext()}`;
 }
 
 // ── Estado ────────────────────────────────────────────────────
@@ -335,7 +352,7 @@ function formatTime(secs) {
 function updateBannerDisplay() {
   if (!kumon) return;
   document.getElementById('banner-text').textContent =
-    `${kumon.subjectNome} • Nível ${kumon.nivel} • ⏱️ ${formatTime(kumon.timeLeft)}`;
+    `Tabuada do ${kumon.tabuadaAtual} • Nível ${kumon.nivel} • ⏱️ ${formatTime(kumon.timeLeft)}`;
 }
 
 function startTimer() {
@@ -362,23 +379,33 @@ function loadProgress() {
   try { return JSON.parse(localStorage.getItem('kumon_theo') || '{}'); } catch { return {}; }
 }
 function saveProgress(p) { localStorage.setItem('kumon_theo', JSON.stringify(p)); }
-function getNivel(id)     { return loadProgress()[id]?.nivel    || 1; }
-function getSessoes90(id) { return loadProgress()[id]?.sessoes90 || 0; }
+function getNivel(id)     { return loadProgress()[id]?.nivel       || 1; }
+function getTabuada(id)   { return loadProgress()[id]?.tabuadaAtual || 1; }
+function getSessoes90(id) { return loadProgress()[id]?.sessoes90    || 0; }
 
 function registrarSessao(id, nivel, acertou90) {
   const p = loadProgress();
-  if (!p[id]) p[id] = { nivel: 1, sessoes90: 0 };
+  if (!p[id]) p[id] = { nivel: 1, tabuadaAtual: 1, sessoes90: 0 };
+  if (!p[id].tabuadaAtual) p[id].tabuadaAtual = 1;
   if (acertou90) {
     p[id].sessoes90 = (p[id].sessoes90 || 0) + 1;
-    if (p[id].sessoes90 >= SESSIONS_TO_ADV && p[id].nivel < 10) {
-      p[id].nivel++;
-      p[id].sessoes90 = 0;
-      saveProgress(p);
-      return { novoNivel: p[id].nivel, avancou: true, sessoes90: 0 };
+    if (p[id].sessoes90 >= SESSIONS_TO_ADV) {
+      if (p[id].nivel < 10) {
+        p[id].nivel++;
+        p[id].sessoes90 = 0;
+        saveProgress(p);
+        return { novoNivel: p[id].nivel, avancou: 'nivel', sessoes90: 0, tabuadaAtual: p[id].tabuadaAtual };
+      } else if (p[id].tabuadaAtual < 10) {
+        p[id].tabuadaAtual++;
+        p[id].nivel = 1;
+        p[id].sessoes90 = 0;
+        saveProgress(p);
+        return { novoNivel: 1, avancou: 'tabuada', sessoes90: 0, tabuadaAtual: p[id].tabuadaAtual };
+      }
     }
   }
   saveProgress(p);
-  return { novoNivel: p[id].nivel, avancou: false, sessoes90: p[id].sessoes90 };
+  return { novoNivel: p[id].nivel, avancou: false, sessoes90: p[id].sessoes90, tabuadaAtual: p[id].tabuadaAtual };
 }
 
 // ── Kumon UI ──────────────────────────────────────────────────
@@ -387,17 +414,19 @@ function openSubjectOverlay() {
   container.innerHTML = '';
   KUMON_SUBJECTS.forEach(s => {
     const nivel   = getNivel(s.id);
+    const tabuada = getTabuada(s.id);
     const sessoes = getSessoes90(s.id);
+    const meta = nivel < 10 ? `para nível ${nivel + 1}` : tabuada < 10 ? `para tabuada do ${tabuada + 1}` : 'nível máximo!';
     const btn = document.createElement('button');
     btn.className = 'subject-btn';
     btn.innerHTML = `
       <span class="s-icon">${s.icon}</span>
       <span class="s-info">
-        <span class="s-name">${s.nome}</span>
+        <span class="s-name">${s.nome} do ${tabuada}</span>
         <span class="s-nivel">Nível ${nivel}/10</span>
-        <span class="s-sessoes">${sessoes}/${SESSIONS_TO_ADV} aventuras 90%+ para avançar</span>
+        <span class="s-sessoes">${sessoes}/${SESSIONS_TO_ADV} aventuras 90%+ ${meta}</span>
       </span>`;
-    btn.onclick = () => startKumon(s.id, s.nome, s.icon, nivel);
+    btn.onclick = () => startKumon(s.id, s.nome, s.icon, nivel, tabuada);
     container.appendChild(btn);
   });
   document.getElementById('subject-overlay').classList.add('visible');
@@ -406,9 +435,10 @@ function closeSubjectOverlay() {
   document.getElementById('subject-overlay').classList.remove('visible');
 }
 
-async function startKumon(subjectId, subjectNome, subjectIcon, nivel) {
+async function startKumon(subjectId, subjectNome, subjectIcon, nivel, tabuadaAtual) {
   closeSubjectOverlay();
-  kumon = { subjectId, subjectNome, subjectIcon, nivel, count: 0, acertos: 0, erros: 0, timeLeft: KUMON_DURATION, timerInterval: null };
+  const tab = tabuadaAtual || 1;
+  kumon = { subjectId, subjectNome, subjectIcon, nivel, tabuadaAtual: tab, count: 0, acertos: 0, erros: 0, timeLeft: KUMON_DURATION, timerInterval: null };
 
   headerEl.classList.add('kumon-mode');
   studyBtn.classList.add('active');
@@ -422,13 +452,13 @@ async function startKumon(subjectId, subjectNome, subjectIcon, nivel) {
 
   conversationHistory = [];
   messagesEl.innerHTML = '';
-  addMessage(`📚 Modo Kumon Ativo — ${subjectNome} • Nível ${nivel}/10 🦖`, 'system');
+  addMessage(`📚 Modo Kumon Ativo — Tabuada do ${tab} • Nível ${nivel}/10 🦖`, 'system');
 
   setInputLocked(true);
   showTyping();
   const trigger = [{ role: 'user', content: 'Vamos começar a aventura!' }];
   try {
-    const reply = await fetchClaude(buildKumonPrompt(subjectNome, nivel), trigger);
+    const reply = await fetchClaude(buildKumonPrompt(subjectNome, nivel, tab), trigger);
     hideTyping();
     conversationHistory = [...trigger, { role: 'assistant', content: reply }];
     addMessage(reply, 'bot');
@@ -467,18 +497,19 @@ function starsFromScore(acertos, total) {
 function showSummary() {
   if (kumon?.timerInterval) { clearInterval(kumon.timerInterval); kumon.timerInterval = null; }
   kumonBanner.classList.remove('warning');
-  const { acertos, erros, subjectNome, nivel, subjectId } = kumon;
+  const { acertos, erros, subjectNome, nivel, subjectId, tabuadaAtual } = kumon;
   const total = acertos + erros;
   const pct   = total ? Math.round((acertos / total) * 100) : 0;
   const stars  = starsFromScore(acertos, total);
   const starStr = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
-  const { novoNivel, avancou, sessoes90 } = registrarSessao(subjectId, nivel, pct >= 90);
+  const { novoNivel, avancou, sessoes90, tabuadaAtual: novaTabuada } = registrarSessao(subjectId, nivel, pct >= 90);
 
   let levelMsg = '';
-  if (avancou)                       levelMsg = `🎉 UAU! Você passou pro Nível ${novoNivel}! Incrível! 🦖`;
-  else if (nivel >= 10 && pct >= 90) levelMsg = '🏆 Nível máximo desbloqueado! Você é um gênio! 🦖';
-  else if (pct >= 90)                levelMsg = `🌟 Ótimo! ${sessoes90}/${SESSIONS_TO_ADV} aventuras 90%+ para avançar de nível!`;
-  else                               levelMsg = `Continue explorando! ${sessoes90}/${SESSIONS_TO_ADV} aventuras 90%+ acumuladas 💪`;
+  if (avancou === 'tabuada')                    levelMsg = `🎉 INCRÍVEL! Você dominou a tabuada do ${tabuadaAtual}! Agora: tabuada do ${novaTabuada}! 🦖🔥`;
+  else if (avancou === 'nivel')                 levelMsg = `🎉 UAU! Você passou pro Nível ${novoNivel}! Incrível! 🦖`;
+  else if (nivel >= 10 && tabuadaAtual >= 10 && pct >= 90) levelMsg = '🏆 Você dominou TODAS as tabuadas! Campeão absoluto! 🦖👑';
+  else if (pct >= 90)                           levelMsg = `🌟 Ótimo! ${sessoes90}/${SESSIONS_TO_ADV} aventuras 90%+ para avançar!`;
+  else                                          levelMsg = `Continue explorando! ${sessoes90}/${SESSIONS_TO_ADV} aventuras 90%+ acumuladas 💪`;
 
   const msgs = [
     'Cada tentativa é uma vitória! Continue explorando! 🦖',
@@ -487,7 +518,7 @@ function showSummary() {
     'Quase perfeito! Você é incrível! 🚀',
     'PERFEITO! Você é um dinossauro genial! 🦖⭐',
   ];
-  document.getElementById('sum-title').textContent = `${subjectNome} concluída! 🎉`;
+  document.getElementById('sum-title').textContent = `Tabuada do ${tabuadaAtual} concluída! 🎉`;
   document.getElementById('sum-stars').textContent = starStr;
   document.getElementById('sum-score').textContent = `${acertos} de ${total} certas (${pct}%)`;
   document.getElementById('sum-msg').textContent   = msgs[stars - 1];
@@ -570,7 +601,7 @@ async function sendMessage(text) {
     updateKumonBar();
     conversationHistory.push({ role: 'user', content: text });
     try {
-      const reply = await fetchClaude(buildKumonPrompt(kumon.subjectNome, kumon.nivel), conversationHistory);
+      const reply = await fetchClaude(buildKumonPrompt(kumon.subjectNome, kumon.nivel, kumon.tabuadaAtual), conversationHistory);
       hideTyping();
       const marker = parseMarker(reply);
       if (marker === 'OK')   kumon.acertos++;
