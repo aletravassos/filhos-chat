@@ -214,6 +214,27 @@ const KUMON_SUBJECTS = [
   { id: 'tabuada', nome: 'Tabuada', icon: '🔢' },
 ];
 
+// ── Detecção de tópicos do chat livre ────────────────────────
+const TOPIC_MAP = {
+  'matemática':    ['conta', 'número', 'cálculo', 'equação', 'fração', 'porcentagem', 'soma', 'subtrai', 'multiplic', 'divisão', 'divide', 'tabuada', 'geometria', 'álgebra', 'matemática', 'raiz', 'potência'],
+  'português':     ['redação', 'texto', 'gramática', 'ortografia', 'verbo', 'substantivo', 'crase', 'pontuação', 'escrever', 'escrita', 'leitura', 'livro', 'poesia', 'conto', 'português'],
+  'inglês':        ['english', 'word', 'vocabulary', 'tradução', 'traduz', 'inglês', 'significa', 'pronuncia', 'speak', 'write'],
+  'ciências':      ['animal', 'planta', 'célula', 'corpo humano', 'planeta', 'universo', 'experimento', 'natureza', 'biologia', 'química', 'física', 'ciência', 'fotossíntese', 'evolução'],
+  'história':      ['guerra', 'revolução', 'história', 'século', 'imperador', 'rei', 'presidente', 'civilização', 'egito', 'grécia', 'roma', 'escravidão'],
+  'geografia':     ['país', 'continente', 'capital', 'mapa', 'clima', 'relevo', 'floresta', 'amazônia', 'bioma', 'rio', 'oceano', 'geografia'],
+  'música':        ['música', 'cantora', 'cantor', 'álbum', 'letra', 'spotify', 'playlist', 'ouvi', 'show', 'concerto'],
+  'séries/filmes': ['série', 'temporada', 'episódio', 'netflix', 'disney', 'filme', 'assistindo', 'assisti'],
+  'saúde mental':  ['ansiedade', 'tristeza', 'estresse', 'emoção', 'sentimento', 'me sentindo', 'me sinto'],
+};
+
+function detectTopic(text) {
+  const lower = text.toLowerCase();
+  for (const [topic, keywords] of Object.entries(TOPIC_MAP)) {
+    if (keywords.some(k => lower.includes(k))) return topic;
+  }
+  return null;
+}
+
 // ── Detecção de interesses para perfil ───────────────────────
 const INTEREST_MAP = {
   artistas: [
@@ -486,6 +507,22 @@ function starsFromScore(acertos, total) {
   return 1;
 }
 
+function saveProgressKumon(nivel, sessoes90) {
+  fetch(`${WORKER_URL}/profile/${PROFILE_USER}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ patches: { progresso_kumon: { nivel, sessoes90, ultimaAtualizacao: new Date().toISOString() } } }),
+  }).catch(() => {});
+}
+
+function saveTopicStudied(assunto) {
+  fetch(`${WORKER_URL}/profile/${PROFILE_USER}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ patches: { topicos_estudados: [{ assunto, data: new Date().toISOString() }] } }),
+  }).catch(() => {});
+}
+
 function saveSessionHistory(sessionData) {
   fetch(`${WORKER_URL}/history/${PROFILE_USER}`, {
     method: 'POST',
@@ -505,6 +542,7 @@ function showSummary() {
   const stars  = starsFromScore(acertos, total);
   const starStr = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
   const { novoNivel, avancou, sessoes90 } = registrarSessao(subjectId, nivel, pct >= 90);
+  saveProgressKumon(novoNivel, sessoes90);
 
   let levelMsg = '';
   if (avancou)              levelMsg = `🎉 Você avançou para o Nível ${novoNivel}! Incrível!`;
@@ -622,6 +660,8 @@ async function sendMessage(text) {
       hideTyping();
       addMessage(reply, 'bot');
       conversationHistory.push({ role: 'assistant', content: reply });
+      const topic = detectTopic(text);
+      if (topic) saveTopicStudied(topic);
     } catch (err) {
       hideTyping();
       addMessage('❌ Não consegui conectar: ' + err.message, 'system');

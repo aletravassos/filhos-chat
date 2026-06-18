@@ -152,6 +152,21 @@
   .theo .interest-tag   { background: rgba(16,185,129,0.15); color: #a7f3d0; border: 1px solid rgba(16,185,129,0.25); }
   .no-interests { font-size: 12px; opacity: 0.35; }
 
+  /* Tópicos */
+  .topic-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .topic-date { font-size: 9px; opacity: 0.45; }
+  .olivia .topic-tag { background: rgba(139,92,246,0.18); color: #ddd6fe; border: 1px solid rgba(139,92,246,0.3); }
+  .theo .topic-tag   { background: rgba(59,130,246,0.15); color: #bfdbfe; border: 1px solid rgba(59,130,246,0.25); }
+
   /* Mensagem de progresso */
   .progress-msg {
     font-size: 13px;
@@ -311,14 +326,6 @@ async function fetchJSON(url) {
   return r.json();
 }
 
-// ── localStorage helpers (mesma lógica dos chats) ─────────────
-function getLocalProgress(key) {
-  try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; }
-}
-function localNivel(key, id)     { return getLocalProgress(key)[id]?.nivel       || 1; }
-function localTabuada(key, id)   { return getLocalProgress(key)[id]?.tabuadaAtual || 1; }
-function localSessoes90(key, id) { return getLocalProgress(key)[id]?.sessoes90    || 0; }
-
 // ── Build card content ────────────────────────────────────────
 function buildCard(el, { user, profile, nivel, tabuadaAtual, sessoes90 }) {
   const isOlivia = user === 'olivia';
@@ -373,6 +380,11 @@ function buildCard(el, { user, profile, nivel, tabuadaAtual, sessoes90 }) {
     </div>
 
     <div class="section">
+      <div class="section-label">Últimos assuntos no chat</div>
+      ${buildTopics(user, profile)}
+    </div>
+
+    <div class="section">
       <div class="section-label">Progresso</div>
       <div class="progress-msg">${progressMsg}</div>
     </div>
@@ -395,6 +407,21 @@ function buildInterests(user, profile) {
   }
   if (!tags.length) return '<div class="no-interests">Nenhum interesse registrado ainda.</div>';
   return '<div class="interests">' + tags.map(t => `<span class="interest-tag">${t}</span>`).join('') + '</div>';
+}
+
+function buildTopics(user, profile) {
+  const topicos = profile?.topicos_estudados;
+  if (!topicos?.length) return '<div class="no-interests">Nenhum assunto registrado no chat ainda.</div>';
+  const seen = new Set();
+  const recent = [];
+  for (let i = topicos.length - 1; i >= 0 && recent.length < 6; i--) {
+    const t = topicos[i];
+    if (!seen.has(t.assunto)) { seen.add(t.assunto); recent.push(t); }
+  }
+  const fmt = d => new Date(d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+  return '<div class="interests">' + recent.map(t =>
+    `<span class="topic-tag">📖 ${t.assunto} <span class="topic-date">${fmt(t.data)}</span></span>`
+  ).join('') + '</div>';
 }
 
 function buildProgressMsg(user, nivel, tabuadaAtual, sessoes90) {
@@ -506,15 +533,12 @@ async function loadAll() {
       fetchJSON(`${WORKER}/history/theo`),
     ]);
 
-    // Progress from localStorage (source of truth for levels)
-    const oliviaNivel     = localNivel('kumon_olivia', 'tabuada');
-    const oliviaSessoes90 = localSessoes90('kumon_olivia', 'tabuada');
-    const theoNivel       = localNivel('kumon_theo', 'tabuada');
-    const theoTabuada     = localTabuada('kumon_theo', 'tabuada');
-    const theoSessoes90   = localSessoes90('kumon_theo', 'tabuada');
+    // Progress from worker profile (source of truth — device-independent)
+    const oliviaProg = oliviaProfile.progresso_kumon || { nivel: 1, sessoes90: 0 };
+    const theoProg   = theoProfile.progresso_kumon   || { nivel: 1, tabuadaAtual: 1, sessoes90: 0 };
 
-    buildCard(cardO, { user: 'olivia', profile: oliviaProfile, nivel: oliviaNivel, tabuadaAtual: null, sessoes90: oliviaSessoes90 });
-    buildCard(cardT, { user: 'theo',   profile: theoProfile,   nivel: theoNivel,   tabuadaAtual: theoTabuada, sessoes90: theoSessoes90 });
+    buildCard(cardO, { user: 'olivia', profile: oliviaProfile, nivel: oliviaProg.nivel, tabuadaAtual: null, sessoes90: oliviaProg.sessoes90 });
+    buildCard(cardT, { user: 'theo',   profile: theoProfile,   nivel: theoProg.nivel,   tabuadaAtual: theoProg.tabuadaAtual || 1, sessoes90: theoProg.sessoes90 });
 
     buildChart(oliviaHistory, theoHistory);
 

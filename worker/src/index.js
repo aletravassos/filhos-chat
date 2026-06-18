@@ -91,11 +91,23 @@ export default {
       const { patches } = await request.json();
       if (!patches || typeof patches !== 'object') return json({ error: 'patches obrigatório.' }, 400);
       const profile = await getProfile(env, user);
-      for (const [cat, items] of Object.entries(patches)) {
-        if (!Array.isArray(profile[cat])) profile[cat] = [];
-        const set = new Set(profile[cat].map(s => String(s).toLowerCase()));
-        for (const item of items) {
-          if (!set.has(String(item).toLowerCase())) profile[cat].push(item);
+      for (const [cat, value] of Object.entries(patches)) {
+        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+          // Plain object → overwrite (e.g. progresso_kumon)
+          profile[cat] = value;
+        } else if (Array.isArray(value)) {
+          if (!Array.isArray(profile[cat])) profile[cat] = [];
+          if (value.length > 0 && value[0] !== null && typeof value[0] === 'object') {
+            // Array of objects → append + trim to 100 (e.g. topicos_estudados)
+            for (const item of value) profile[cat].push(item);
+            if (profile[cat].length > 100) profile[cat] = profile[cat].slice(-100);
+          } else {
+            // Array of strings → dedup append (interests)
+            const set = new Set(profile[cat].map(s => String(s).toLowerCase()));
+            for (const item of value) {
+              if (!set.has(String(item).toLowerCase())) profile[cat].push(item);
+            }
+          }
         }
       }
       profile.updatedAt = new Date().toISOString();

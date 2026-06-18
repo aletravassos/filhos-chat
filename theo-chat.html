@@ -202,6 +202,29 @@ const KUMON_SUBJECTS = [
   { id: 'tabuada', nome: 'Tabuada', icon: '🔢' },
 ];
 
+// ── Detecção de tópicos do chat livre ────────────────────────
+const TOPIC_MAP = {
+  'matemática':   ['conta', 'número', 'cálculo', 'soma', 'subtrai', 'multiplic', 'divisão', 'divide', 'tabuada', 'geometria', 'matemática', 'raiz', 'potência'],
+  'português':    ['redação', 'texto', 'gramática', 'verbo', 'substantivo', 'crase', 'pontuação', 'escrever', 'escrita', 'leitura', 'livro', 'poesia', 'português'],
+  'inglês':       ['english', 'word', 'vocabulary', 'tradução', 'traduz', 'inglês', 'significa', 'speak', 'write'],
+  'ciências':     ['animal', 'planta', 'célula', 'corpo humano', 'planeta', 'universo', 'experimento', 'natureza', 'biologia', 'química', 'física', 'ciência', 'fotossíntese'],
+  'história':     ['guerra', 'revolução', 'história', 'século', 'imperador', 'rei', 'presidente', 'civilização', 'egito', 'grécia', 'roma'],
+  'geografia':    ['país', 'continente', 'capital', 'mapa', 'clima', 'relevo', 'floresta', 'amazônia', 'bioma', 'rio', 'oceano', 'geografia'],
+  'dinossauros':  ['dinossauro', 't-rex', 'tiranossauro', 'triceratops', 'velociraptor', 'jurássico', 'pterodátilo', 'fóssil', 'extinção'],
+  'minecraft':    ['minecraft', 'crafting', 'creeper', 'enderman', 'nether', 'redstone', 'bloco', 'minerar'],
+  'mario':        ['mario', 'luigi', 'bowser', 'peach', 'yoshi', 'cogumelo', 'nintendo', 'kart'],
+  'pokémon':      ['pokémon', 'pokemon', 'pikachu', 'charizard', 'bulbasaur', 'evoluir', 'pokébola', 'treinar pokémon'],
+  'super-heróis': ['super-herói', 'herói', 'batman', 'superman', 'homem-aranha', 'spider-man', 'thor', 'hulk', 'flash'],
+};
+
+function detectTopic(text) {
+  const lower = text.toLowerCase();
+  for (const [topic, keywords] of Object.entries(TOPIC_MAP)) {
+    if (keywords.some(k => lower.includes(k))) return topic;
+  }
+  return null;
+}
+
 // ── Detecção de interesses para perfil ───────────────────────
 const INTEREST_MAP = {
   jogos: [
@@ -494,6 +517,22 @@ function starsFromScore(acertos, total) {
   return 1;
 }
 
+function saveProgressKumon(nivel, tabuadaAtual, sessoes90) {
+  fetch(`${WORKER_URL}/profile/${PROFILE_USER}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ patches: { progresso_kumon: { nivel, tabuadaAtual, sessoes90, ultimaAtualizacao: new Date().toISOString() } } }),
+  }).catch(() => {});
+}
+
+function saveTopicStudied(assunto) {
+  fetch(`${WORKER_URL}/profile/${PROFILE_USER}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ patches: { topicos_estudados: [{ assunto, data: new Date().toISOString() }] } }),
+  }).catch(() => {});
+}
+
 function saveSessionHistory(sessionData) {
   fetch(`${WORKER_URL}/history/${PROFILE_USER}`, {
     method: 'POST',
@@ -513,6 +552,7 @@ function showSummary() {
   const stars  = starsFromScore(acertos, total);
   const starStr = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
   const { novoNivel, avancou, sessoes90, tabuadaAtual: novaTabuada } = registrarSessao(subjectId, nivel, pct >= 90);
+  saveProgressKumon(novoNivel, novaTabuada, sessoes90);
 
   let levelMsg = '';
   if (avancou === 'tabuada')                    levelMsg = `🎉 INCRÍVEL! Você dominou a tabuada do ${tabuadaAtual}! Agora: tabuada do ${novaTabuada}! 🦖🔥`;
@@ -631,6 +671,8 @@ async function sendMessage(text) {
       hideTyping();
       addMessage(reply, 'bot');
       conversationHistory.push({ role: 'assistant', content: reply });
+      const topic = detectTopic(text);
+      if (topic) saveTopicStudied(topic);
     } catch (err) {
       hideTyping();
       addMessage('❌ Não consegui me conectar: ' + err.message, 'system');
