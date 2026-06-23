@@ -143,6 +143,120 @@
   .summary-level-msg { color:#d97706; font-size:15px; font-weight:900; margin-bottom:14px; }
   .summary-btn { padding:15px 36px; border-radius:28px; border:none; background:var(--laranja); color:#fff; font-size:18px; font-weight:900; cursor:pointer; font-family:inherit; box-shadow:0 4px 0 #c2410c; transition:transform .1s; }
   .summary-btn:active { transform:translateY(2px); box-shadow:0 2px 0 #c2410c; }
+
+  /* ── Folha Kumon ──────────────────────────────────────────── */
+  #folha-panel {
+    display:none; position:absolute; inset:0; z-index:25;
+    background:#FFFBEB; flex-direction:column; overflow:hidden;
+  }
+  #folha-panel.visible { display:flex; }
+
+  #folha-setup {
+    flex:1; overflow-y:auto; display:flex; flex-direction:column;
+    align-items:center; padding:20px 20px 24px; gap:14px;
+  }
+  #folha-setup h2 { color:#1d4ed8; margin:0; font-size:24px; font-weight:900; }
+  #folha-setup p  { color:#065f46; font-size:15px; font-weight:700; margin:0; }
+
+  .folha-group { width:100%; max-width:320px; }
+  .folha-group label { display:block; font-size:13px; font-weight:800; color:#92400e; margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+
+  .folha-ops, .folha-diffs { display:flex; gap:8px; }
+  .folha-op-btn, .folha-diff-btn {
+    flex:1; padding:11px 4px; border-radius:14px;
+    border:3px solid #FBBF24; background:#FFFBEB;
+    color:#1f2937; font-size:17px; font-weight:900;
+    cursor:pointer; font-family:inherit;
+    box-shadow:0 3px 0 #d97706; transition:background .15s, transform .1s;
+  }
+  .folha-op-btn:hover, .folha-diff-btn:hover { background:#FEF3C7; }
+  .folha-op-btn.active, .folha-diff-btn.active {
+    background:var(--azul); color:#fff; border-color:var(--azul); box-shadow:0 3px 0 #1d4ed8;
+  }
+
+  #folha-start-btn {
+    width:100%; max-width:320px; padding:16px; border-radius:28px; border:none;
+    background:var(--verde); color:#064e3b; font-size:20px; font-weight:900;
+    cursor:pointer; font-family:inherit; box-shadow:0 4px 0 #059669; transition:transform .1s;
+  }
+  #folha-start-btn:active { transform:translateY(2px); box-shadow:0 2px 0 #059669; }
+  #folha-back-setup { background:none; border:none; color:#9ca3af; cursor:pointer; font-size:15px; font-family:inherit; font-weight:700; }
+  #folha-back-setup:hover { color:#374151; }
+
+  #folha-active { flex:1; display:none; flex-direction:column; overflow:hidden; }
+  #folha-active.visible { display:flex; }
+
+  #folha-timer-bar {
+    padding:8px 14px; background:#FEF3C7; border-bottom:3px dashed var(--amarelo);
+    display:flex; align-items:center; gap:10px; flex-shrink:0;
+  }
+  #folha-time { font-size:16px; font-weight:900; color:#92400e; white-space:nowrap; min-width:46px; }
+  #folha-time-track { flex:1; height:10px; background:rgba(251,191,36,0.3); border-radius:8px; overflow:hidden; }
+  #folha-time-fill { height:100%; background:linear-gradient(90deg,var(--verde),var(--azul)); border-radius:8px; transition:width .9s linear; width:100%; }
+  #folha-progress { font-size:13px; font-weight:800; color:#92400e; white-space:nowrap; }
+
+  #folha-grid {
+    flex:1; overflow-y:auto; padding:10px 10px 6px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+    background:#FFFBEB;
+  }
+  #folha-grid::-webkit-scrollbar{width:6px;}
+  #folha-grid::-webkit-scrollbar-thumb{background:var(--amarelo);border-radius:4px;}
+
+  .folha-item {
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:#fff; border-radius:10px; border:2px solid #E5E7EB; padding:6px 4px;
+  }
+  .folha-item .fi-problem { font-size:11px; font-weight:800; color:#374151; text-align:center; white-space:nowrap; }
+  .folha-item .fi-input {
+    width:100%; border:2px solid #D1D5DB; border-radius:7px;
+    padding:5px 2px; font-size:14px; font-weight:800; text-align:center;
+    outline:none; font-family:inherit; background:#F9FAFB; color:#1f2937;
+    transition:border-color .15s, background .15s;
+    -moz-appearance:textfield;
+  }
+  .folha-item .fi-input::-webkit-outer-spin-button,
+  .folha-item .fi-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .folha-item .fi-input:focus { border-color:var(--azul); background:#EFF6FF; }
+  .folha-item .fi-input.correct { border-color:var(--verde); background:#ECFDF5; color:#065f46; pointer-events:none; }
+  .folha-item .fi-input.wrong   { border-color:var(--vermelho); background:#FEF2F2; animation:shake .35s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+
+  #folha-grid-footer {
+    padding:8px 14px; background:#FFFBEB; border-top:3px dashed var(--amarelo);
+    display:flex; justify-content:center; flex-shrink:0;
+  }
+  #folha-abort-btn { background:none; border:none; color:#9ca3af; cursor:pointer; font-size:14px; font-family:inherit; font-weight:700; }
+  #folha-abort-btn:hover { color:#374151; }
+
+  #folha-result {
+    flex:1; display:none; flex-direction:column;
+    align-items:center; justify-content:center; padding:24px 20px; gap:8px;
+    text-align:center; background:linear-gradient(160deg,#FFFBEB 0%,#ECFDF5 100%);
+  }
+  #folha-result.visible { display:flex; }
+  #folha-result h2 { color:#1d4ed8; margin:0; font-size:26px; font-weight:900; }
+  #folha-res-stars { font-size:40px; letter-spacing:4px; }
+  #folha-res-score { color:#065f46; font-size:19px; font-weight:800; }
+  #folha-res-time  { color:#92400e; font-size:15px; font-weight:700; }
+  #folha-retry-btn {
+    margin-top:8px; padding:14px 32px; border-radius:28px; border:none;
+    background:var(--laranja); color:#fff; font-size:18px; font-weight:900;
+    cursor:pointer; font-family:inherit; box-shadow:0 4px 0 #c2410c; transition:transform .1s;
+  }
+  #folha-retry-btn:active { transform:translateY(2px); box-shadow:0 2px 0 #c2410c; }
+  #folha-to-chat-btn { background:none; border:none; color:#9ca3af; cursor:pointer; font-size:15px; font-family:inherit; font-weight:700; margin-top:4px; }
+  #folha-to-chat-btn:hover { color:#374151; }
+
+  #folha-btn {
+    background:rgba(255,255,255,0.25); border:2.5px solid rgba(255,255,255,0.6);
+    color:#fff; border-radius:22px; padding:8px 13px; font-size:13px; font-weight:800;
+    cursor:pointer; white-space:nowrap; font-family:inherit;
+    transition:background .2s, transform .1s; text-shadow:1px 1px 2px rgba(0,0,0,0.2);
+    flex-shrink:0;
+  }
+  #folha-btn:hover  { background:rgba(255,255,255,0.42); }
+  #folha-btn.active { background:rgba(255,255,255,0.92); color:#14532d; text-shadow:none; }
 </style>
 </head>
 <body>
@@ -154,6 +268,7 @@
       <p>🟢 pronto pra brincar!</p>
     </div>
     <button id="study-btn">📚 Kumon</button>
+    <button id="folha-btn">📋 Folha</button>
   </header>
 
   <div id="kumon-banner">📚 Modo Kumon Ativo — <span id="banner-text"></span></div>
@@ -182,6 +297,62 @@
     <div class="summary-msg"   id="sum-msg"></div>
     <div class="summary-level-msg" id="sum-level"></div>
     <button class="summary-btn" onclick="closeSummary()">Continuar! 🚀</button>
+  </div>
+
+  <!-- ── Folha Kumon Panel ──────────────────────────────────── -->
+  <div id="folha-panel">
+
+    <!-- Setup -->
+    <div id="folha-setup">
+      <h2>📋 Folha Kumon</h2>
+      <p>Configure sua folha de exercícios! 🦖</p>
+
+      <div class="folha-group">
+        <label>Operação</label>
+        <div class="folha-ops" id="folha-ops">
+          <button class="folha-op-btn active" data-op="+">+</button>
+          <button class="folha-op-btn" data-op="−">−</button>
+          <button class="folha-op-btn" data-op="×">×</button>
+          <button class="folha-op-btn" data-op="mix">mix</button>
+        </div>
+      </div>
+
+      <div class="folha-group">
+        <label>Dificuldade</label>
+        <div class="folha-diffs" id="folha-diffs">
+          <button class="folha-diff-btn active" data-diff="fácil">fácil</button>
+          <button class="folha-diff-btn" data-diff="médio">médio</button>
+          <button class="folha-diff-btn" data-diff="difícil">difícil</button>
+        </div>
+      </div>
+
+      <button id="folha-start-btn">▶ começar!</button>
+      <button id="folha-back-setup">💬 voltar ao chat</button>
+    </div>
+
+    <!-- Active grid -->
+    <div id="folha-active">
+      <div id="folha-timer-bar">
+        <span id="folha-time">20:00</span>
+        <div id="folha-time-track"><div id="folha-time-fill"></div></div>
+        <span id="folha-progress">✅ 0/80</span>
+      </div>
+      <div id="folha-grid"></div>
+      <div id="folha-grid-footer">
+        <button id="folha-abort-btn">💬 sair da folha</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="folha-result">
+      <h2>Folha concluída! 🎉</h2>
+      <div id="folha-res-stars"></div>
+      <div id="folha-res-score"></div>
+      <div id="folha-res-time"></div>
+      <button id="folha-retry-btn">🔄 de novo!</button>
+      <button id="folha-to-chat-btn">💬 voltar ao chat</button>
+    </div>
+
   </div>
 
   <form id="form">
@@ -690,6 +861,183 @@ form.addEventListener('submit', (e) => {
 
 // Carrega perfil ao iniciar
 loadProfile();
+
+// ── Folha Kumon ───────────────────────────────────────────────
+const FOLHA_DURATION = 20 * 60;
+const FOLHA_COUNT    = 80;
+
+const folhaState = { op: '+', diff: 'fácil', problems: [], correct: 0, timeLeft: FOLHA_DURATION, timerInterval: null, startTime: null };
+
+const folhaBtn      = document.getElementById('folha-btn');
+const folhaPanel    = document.getElementById('folha-panel');
+const folhaSetup    = document.getElementById('folha-setup');
+const folhaActive   = document.getElementById('folha-active');
+const folhaResult   = document.getElementById('folha-result');
+
+function folhaOpen() {
+  folhaPanel.classList.add('visible');
+  folhaBtn.classList.add('active');
+  folhaBtn.textContent = '💬 Chat';
+  folhaShowSetup();
+}
+
+function folhaClose() {
+  if (folhaState.timerInterval) { clearInterval(folhaState.timerInterval); folhaState.timerInterval = null; }
+  folhaPanel.classList.remove('visible');
+  folhaBtn.classList.remove('active');
+  folhaBtn.textContent = '📋 Folha';
+}
+
+function folhaShowSetup() {
+  folhaSetup.style.display = 'flex';
+  folhaActive.classList.remove('visible');
+  folhaResult.classList.remove('visible');
+}
+
+function folhaShowActive() {
+  folhaSetup.style.display = 'none';
+  folhaActive.classList.add('visible');
+  folhaResult.classList.remove('visible');
+}
+
+function folhaShowResult() {
+  folhaSetup.style.display = 'none';
+  folhaActive.classList.remove('visible');
+  folhaResult.classList.add('visible');
+}
+
+function generateProblem(op, diff) {
+  const o = op === 'mix' ? ['+', '−', '×'][Math.floor(Math.random() * 3)] : op;
+  let a, b;
+  if (o === '+') {
+    const mx = diff === 'fácil' ? 15 : diff === 'médio' ? 50 : 99;
+    a = Math.floor(Math.random() * mx) + 1;
+    b = Math.floor(Math.random() * mx) + 1;
+    return { a, b, op: o, ans: a + b };
+  } else if (o === '−') {
+    const mx = diff === 'fácil' ? 15 : diff === 'médio' ? 50 : 99;
+    a = Math.floor(Math.random() * mx) + 2;
+    b = Math.floor(Math.random() * (a - 1)) + 1;
+    return { a, b, op: o, ans: a - b };
+  } else {
+    const mxA = diff === 'fácil' ? 5  : 10;
+    const mxB = diff === 'fácil' ? 10 : 10;
+    a = Math.floor(Math.random() * mxA) + 1;
+    b = Math.floor(Math.random() * mxB) + 1;
+    return { a, b, op: o, ans: a * b };
+  }
+}
+
+function startFolha() {
+  if (folhaState.timerInterval) { clearInterval(folhaState.timerInterval); folhaState.timerInterval = null; }
+  folhaState.problems = Array.from({ length: FOLHA_COUNT }, () => generateProblem(folhaState.op, folhaState.diff));
+  folhaState.correct   = 0;
+  folhaState.timeLeft  = FOLHA_DURATION;
+  folhaState.startTime = Date.now();
+
+  // build grid
+  const grid = document.getElementById('folha-grid');
+  grid.innerHTML = '';
+  folhaState.problems.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'folha-item';
+    item.innerHTML = `<span class="fi-problem">${p.a} ${p.op} ${p.b} =</span><input class="fi-input" type="number" inputmode="numeric" data-idx="${i}" placeholder="?">`;
+    grid.appendChild(item);
+  });
+
+  const inputs = [...grid.querySelectorAll('.fi-input')];
+
+  function findNext(from) {
+    for (let j = from + 1; j < inputs.length; j++) if (!inputs[j].dataset.done) return inputs[j];
+    return null;
+  }
+
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (inp.dataset.done || inp.value === '') return;
+      const val = parseInt(inp.value, 10);
+      if (isNaN(val)) return;
+
+      if (val === folhaState.problems[idx].ans) {
+        inp.classList.add('correct');
+        inp.dataset.done = '1';
+        folhaState.correct++;
+        updateFolhaProgress();
+        const nxt = findNext(idx);
+        if (nxt) nxt.focus();
+        if (folhaState.correct >= FOLHA_COUNT) { clearInterval(folhaState.timerInterval); folhaState.timerInterval = null; setTimeout(() => endFolha(false), 600); }
+      } else {
+        inp.classList.add('wrong');
+        setTimeout(() => { inp.classList.remove('wrong'); inp.value = ''; inp.focus(); }, 450);
+      }
+    });
+  });
+
+  updateFolhaTimer();
+  folhaState.timerInterval = setInterval(() => {
+    folhaState.timeLeft--;
+    updateFolhaTimer();
+    if (folhaState.timeLeft <= 0) { clearInterval(folhaState.timerInterval); folhaState.timerInterval = null; endFolha(true); }
+  }, 1000);
+
+  folhaShowActive();
+  setTimeout(() => inputs[0]?.focus(), 100);
+}
+
+function updateFolhaTimer() {
+  const m = Math.floor(folhaState.timeLeft / 60);
+  const s = folhaState.timeLeft % 60;
+  document.getElementById('folha-time').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('folha-time-fill').style.width = `${(folhaState.timeLeft / FOLHA_DURATION) * 100}%`;
+  if (folhaState.timeLeft <= 120) document.getElementById('folha-time-fill').style.background = 'linear-gradient(90deg,var(--vermelho),var(--laranja))';
+}
+
+function updateFolhaProgress() {
+  document.getElementById('folha-progress').textContent = `✅ ${folhaState.correct}/${FOLHA_COUNT}`;
+}
+
+function endFolha(timeOut) {
+  const elapsed = Math.round((Date.now() - folhaState.startTime) / 1000);
+  const pct   = Math.round((folhaState.correct / FOLHA_COUNT) * 100);
+  const stars = pct >= 95 ? 5 : pct >= 80 ? 4 : pct >= 60 ? 3 : pct >= 40 ? 2 : 1;
+  document.getElementById('folha-res-stars').textContent = '⭐'.repeat(stars) + '✩'.repeat(5 - stars);
+  document.getElementById('folha-res-score').textContent = `${folhaState.correct} de ${FOLHA_COUNT} certas (${pct}%)`;
+  const mm = String(Math.floor(elapsed / 60)).padStart(2,'0');
+  const ss = String(elapsed % 60).padStart(2,'0');
+  document.getElementById('folha-res-time').textContent = timeOut ? '⏰ Tempo esgotado!' : `⏱️ Tempo: ${mm}:${ss}`;
+  folhaShowResult();
+}
+
+// ── Folha event listeners ──────────────────────────────────────
+folhaBtn.addEventListener('click', () => {
+  if (folhaPanel.classList.contains('visible')) { folhaClose(); }
+  else { folhaOpen(); }
+});
+
+document.getElementById('folha-back-setup').addEventListener('click', folhaClose);
+document.getElementById('folha-abort-btn').addEventListener('click', () => { if (confirm('Sair da folha?')) folhaClose(); });
+document.getElementById('folha-to-chat-btn').addEventListener('click', folhaClose);
+document.getElementById('folha-retry-btn').addEventListener('click', () => { folhaShowSetup(); });
+
+document.getElementById('folha-start-btn').addEventListener('click', startFolha);
+
+document.querySelectorAll('.folha-op-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.folha-op-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    folhaState.op = btn.dataset.op;
+  });
+});
+
+document.querySelectorAll('.folha-diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.folha-diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    folhaState.diff = btn.dataset.diff;
+  });
+});
 </script>
 </body>
 </html>
