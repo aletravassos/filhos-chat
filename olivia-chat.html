@@ -155,6 +155,131 @@
   .summary-level-msg { color: var(--rosa); font-size: 14px; font-weight: 700; margin-bottom: 16px; }
   .summary-btn { padding: 13px 34px; border-radius: 26px; border: none; background: linear-gradient(135deg, var(--rosa), var(--roxo)); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; transition: transform .15s; }
   .summary-btn:hover { transform: scale(1.04); }
+
+  /* ── História do Brasil ─────────────────────────────────── */
+  #history-btn {
+    background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.45);
+    color: #fff; border-radius: 20px; padding: 7px 10px; font-size: 12px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; font-family: inherit;
+    transition: background 0.2s, transform 0.1s; flex-shrink: 0;
+  }
+  #history-btn:hover  { background: rgba(255,255,255,0.32); }
+  #history-btn.active { background: rgba(255,255,255,0.9); color: var(--roxo-escuro); }
+
+  #historia-panel {
+    display: none; position: absolute; inset: 0; z-index: 20;
+    flex-direction: column; background: #1a1025;
+  }
+  #historia-panel.visible { display: flex; }
+
+  #hist-header {
+    background: linear-gradient(120deg, var(--roxo), var(--rosa));
+    padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  #chat-back-btn {
+    background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.45);
+    color: #fff; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background 0.2s; flex-shrink: 0;
+  }
+  #chat-back-btn:hover { background: rgba(255,255,255,0.32); }
+  #hist-header-title { color: #fff; font-size: 16px; font-weight: 700; flex: 1; text-align: center; }
+
+  #hist-tabs {
+    display: flex; background: #211530; flex-shrink: 0;
+    border-bottom: 2px solid rgba(236,72,153,0.12);
+  }
+  .hist-tab {
+    flex: 1; padding: 11px 4px; border: none; background: transparent;
+    color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.2s;
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+  }
+  .hist-tab.active { color: var(--rosa); border-bottom-color: var(--rosa); }
+  .hist-tab:hover:not(.active) { color: rgba(255,255,255,0.7); }
+
+  #hist-content { flex: 1; overflow: hidden; position: relative; }
+  .hist-tab-content { display: none; position: absolute; inset: 0; overflow-y: auto; padding: 16px; }
+  .hist-tab-content.active { display: block; }
+  .hist-tab-content::-webkit-scrollbar { width: 5px; }
+  .hist-tab-content::-webkit-scrollbar-thumb { background: rgba(236,72,153,0.35); border-radius: 4px; }
+
+  /* Linha do Tempo */
+  .tl-item {
+    border-left: 3px solid rgba(139,92,246,0.45); margin-left: 8px; padding: 0 0 18px 16px;
+    position: relative; cursor: pointer;
+  }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before {
+    content: ''; position: absolute; left: -7px; top: 5px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--rosa); box-shadow: 0 0 6px rgba(236,72,153,0.6);
+  }
+  .tl-period { font-size: 11px; color: var(--rosa); font-weight: 700; margin-bottom: 2px; letter-spacing: 0.5px; }
+  .tl-title  { font-size: 15px; color: #f3e8ff; font-weight: 600; }
+  .tl-arrow  { font-size: 10px; color: rgba(255,255,255,0.3); margin-left: 6px; transition: transform 0.2s; display: inline-block; }
+  .tl-item.open .tl-arrow { transform: rotate(90deg); }
+  .tl-detail {
+    display: none; margin-top: 8px; font-size: 13px; color: rgba(243,232,255,0.72);
+    line-height: 1.55; padding: 9px 12px; border-radius: 10px;
+    background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.22);
+  }
+  .tl-item.open .tl-detail { display: block; }
+
+  /* Quiz */
+  .quiz-progress { font-size: 12px; color: var(--rosa-claro); margin-bottom: 10px; font-weight: 600; }
+  .quiz-q { background: #2d2440; border-radius: 16px; padding: 18px; border: 1px solid rgba(236,72,153,0.2); margin-bottom: 12px; }
+  .quiz-q-text { font-size: 15px; color: #f3e8ff; font-weight: 600; line-height: 1.45; margin-bottom: 14px; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 9px; }
+  .quiz-opt {
+    padding: 11px 15px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.12);
+    background: #3a2a50; color: #f3e8ff; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: inherit; text-align: left; transition: all 0.18s; width: 100%;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--rosa); background: rgba(236,72,153,0.1); }
+  .quiz-opt.correct { background: rgba(74,222,128,0.15); border-color: #4ade80; color: #86efac; }
+  .quiz-opt.wrong   { background: rgba(248,113,113,0.15); border-color: #f87171; color: #fca5a5; }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-feedback {
+    display: none; margin-top: 12px; padding: 10px 14px; border-radius: 12px;
+    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
+    color: var(--rosa-claro); font-size: 13px; line-height: 1.5;
+  }
+  .quiz-feedback.visible { display: block; }
+  #quiz-next-btn {
+    display: none; margin-top: 12px; width: 100%; padding: 13px; border-radius: 16px; border: none;
+    background: linear-gradient(135deg, var(--rosa), var(--roxo));
+    color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: transform 0.15s;
+  }
+  #quiz-next-btn:hover { transform: scale(1.02); }
+  #quiz-next-btn.visible { display: block; }
+  #quiz-result { display: none; text-align: center; padding: 30px 16px; }
+  #quiz-result.visible { display: block; }
+  .qr-emoji { font-size: 52px; margin-bottom: 10px; }
+  .qr-score { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .qr-label { font-size: 15px; color: var(--rosa-claro); margin-bottom: 24px; }
+  #quiz-restart-btn {
+    padding: 13px 36px; border-radius: 26px; border: none;
+    background: linear-gradient(135deg, var(--rosa), var(--roxo));
+    color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; transition: transform 0.15s;
+  }
+  #quiz-restart-btn:hover { transform: scale(1.04); }
+
+  /* Fichas */
+  .fichas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ficha { height: 120px; cursor: pointer; perspective: 700px; }
+  .ficha-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
+  .ficha.flipped .ficha-inner { transform: rotateY(180deg); }
+  .ficha-front, .ficha-back {
+    position: absolute; inset: 0; border-radius: 14px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 12px; text-align: center;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    border: 1.5px solid rgba(139,92,246,0.3);
+  }
+  .ficha-front { background: linear-gradient(135deg, #2d2440, #3a2a50); color: #f3e8ff; font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .ficha-back  { background: linear-gradient(135deg, #3b0764, #4c1d95); color: #e9d5ff; font-size: 11px; font-weight: 500; line-height: 1.45; transform: rotateY(180deg); border-color: rgba(236,72,153,0.35); }
+  .ficha-hint  { font-size: 10px; color: rgba(255,255,255,0.28); margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -166,6 +291,7 @@
       <p><span class="status-dot"></span> online agora</p>
     </div>
     <button id="study-btn">📚 Kumon</button>
+    <button id="history-btn">🇧🇷 História</button>
   </header>
 
   <div id="kumon-banner">📚 Modo Kumon Ativo — <span id="banner-text"></span></div>
@@ -200,6 +326,23 @@
     <input type="text" id="input" placeholder="Manda um oi pra Olivia..." autocomplete="off">
     <button type="submit" id="send">➤</button>
   </form>
+
+  <div id="historia-panel">
+    <div id="hist-header">
+      <button id="chat-back-btn">💬 Chat</button>
+      <span id="hist-header-title">📖 História do Brasil</span>
+    </div>
+    <div id="hist-tabs">
+      <button class="hist-tab active" data-tab="timeline">🕐 Linha do Tempo</button>
+      <button class="hist-tab" data-tab="quiz">❓ Quiz</button>
+      <button class="hist-tab" data-tab="fichas">🃏 Fichas</button>
+    </div>
+    <div id="hist-content">
+      <div id="tab-timeline" class="hist-tab-content active"></div>
+      <div id="tab-quiz"     class="hist-tab-content"></div>
+      <div id="tab-fichas"   class="hist-tab-content"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -679,6 +822,204 @@ form.addEventListener('submit', (e) => {
 
 // Carrega perfil ao iniciar
 loadProfile();
+
+// ── História do Brasil ──────────────────────────────────────
+const TIMELINE_DATA = [
+  { periodo: 'até 1500',       titulo: 'Povos originários',                  detalhe: 'Antes da chegada europeia, centenas de povos indígenas — Tupi, Guarani, Carib, Macro-Jê. Estimativa de 2 a 6 milhões de pessoas com culturas e territórios próprios.' },
+  { periodo: '1500',           titulo: 'Chegada de Pedro Álvares Cabral',    detalhe: '22 de abril de 1500, litoral baiano. Início da era colonial.' },
+  { periodo: '1530–1532',      titulo: 'Início da colonização efetiva',      detalhe: 'Martim Afonso de Sousa fundou São Vicente. Capitanias hereditárias distribuídas a fidalgos portugueses.' },
+  { periodo: '1549',           titulo: 'Governo-Geral e jesuítas',           detalhe: 'Tomé de Sousa, primeiro governador-geral. Fundação de Salvador. Início da catequese jesuíta.' },
+  { periodo: 'séc. XVI–XVIII', titulo: 'Escravidão africana e ciclos econômicos', detalhe: 'Maior destino do tráfico atlântico. Ciclos: cana, ouro, diamantes, café.' },
+  { periodo: '1808',           titulo: 'Chegada da família real',            detalhe: 'D. João VI fugiu de Napoleão. Portos abertos, Rio torna-se capital do Império português.' },
+  { periodo: '1822',           titulo: 'Independência',                      detalhe: '7 de setembro, D. Pedro I, margens do Ipiranga. Império independente — mas manteve a escravidão.' },
+  { periodo: '1888–1889',      titulo: 'Abolição e República',               detalhe: 'Lei Áurea (13/05/1888). Proclamação da República por Deodoro da Fonseca (15/11/1889).' },
+  { periodo: '1889–1930',      titulo: 'República Velha',                    detalhe: 'Oligarquias de SP e MG. Coronelismo e voto de cabresto. Classes populares excluídas do poder.' },
+  { periodo: '1922',           titulo: 'Semana de Arte Moderna',             detalhe: 'Teatro Municipal de SP. Mário de Andrade, Oswald de Andrade, Tarsila do Amaral. Marco do modernismo brasileiro.' },
+  { periodo: '1930–1945',      titulo: 'Era Vargas',                         detalhe: 'Revolução de 30, Estado Novo (1937). CLT, Petrobras, CSN. Industrialização com repressão política.' },
+  { periodo: '1945–1964',      titulo: 'Democracia populista',               detalhe: 'Dutra, Vargas (suicídio 1954), JK e Brasília (1960), Jango e as reformas de base.' },
+  { periodo: '1964–1985',      titulo: 'Ditadura militar',                   detalhe: 'Golpe de 1º de abril. AI-5 (1968). Milagre econômico. Repressão, tortura e censura.' },
+  { periodo: '1985–1988',      titulo: 'Redemocratização',                   detalhe: 'Diretas Já. Tancredo Neves / Sarney. Constituição Cidadã promulgada em 5 de outubro de 1988.' },
+  { periodo: '1989–hoje',      titulo: 'Brasil contemporâneo',               detalhe: 'Collor (impeachment 1992), Plano Real — FHC (1994), Lula, Dilma (impeachment 2016), Bolsonaro, Lula.' },
+];
+
+const QUIZ_BANK = [
+  { q: 'Em que ano Pedro Álvares Cabral chegou ao Brasil?',
+    opts: ['1492', '1500', '1530', '1822'], correct: 1,
+    feedback: '22 de abril de 1500, no litoral da Bahia, próximo ao Monte Pascoal.' },
+  { q: 'Qual era o principal produto econômico do Brasil no século XVIII?',
+    opts: ['Cana-de-açúcar', 'Borracha', 'Ouro', 'Café'], correct: 2,
+    feedback: 'A mineração em Minas Gerais dominou o século XVIII, com ouro e diamantes.' },
+  { q: 'Por que a família real portuguesa veio ao Brasil em 1808?',
+    opts: ['Epidemia em Portugal', 'Napoleão invadiu Portugal', 'Para fundar o Império', 'Para abolir a escravidão'], correct: 1,
+    feedback: 'Napoleão Bonaparte invadiu Portugal em 1807, forçando a corte a fugir para o Brasil.' },
+  { q: 'Em que ano foi assinada a Lei Áurea, que aboliu a escravidão?',
+    opts: ['1822', '1870', '1888', '1889'], correct: 2,
+    feedback: 'Assinada pela Princesa Isabel em 13 de maio de 1888.' },
+  { q: 'O que foi o Ato Institucional nº 5 (AI-5)?',
+    opts: ['Uma reforma agrária', 'Um ato que suspendeu direitos civis', 'A Constituição de 1964', 'Um programa de Vargas'], correct: 1,
+    feedback: 'Decretado em dezembro de 1968, inaugurou o período mais duro da ditadura militar.' },
+  { q: 'Quem mandou construir Brasília, inaugurada em 1960?',
+    opts: ['Getúlio Vargas', 'Jânio Quadros', 'Juscelino Kubitschek', 'Tancredo Neves'], correct: 2,
+    feedback: 'JK — com o lema "50 anos em 5". Brasília foi inaugurada em 21 de abril de 1960.' },
+  { q: 'O que foi a Semana de Arte Moderna de 1922?',
+    opts: ['Uma revolta militar', 'Um evento de arte modernista', 'A criação da Semana Santa', 'Uma exposição europeia'], correct: 1,
+    feedback: 'Realizada no Teatro Municipal de SP, lançou o modernismo com Mário de Andrade, Tarsila e Oswald.' },
+  { q: 'Quem foi o primeiro presidente eleito diretamente após a ditadura militar?',
+    opts: ['José Sarney', 'Tancredo Neves', 'Fernando Collor', 'FHC'], correct: 2,
+    feedback: 'Fernando Collor venceu as eleições de 1989 — as primeiras diretas para presidente desde 1960.' },
+  { q: 'A Constituição de 1988 foi chamada de "Cidadã" porque…',
+    opts: ['Foi escrita por cidadãos', 'Restaurou e ampliou direitos fundamentais', 'Criou a cidadania brasileira', 'Aboliu a monarquia'], correct: 1,
+    feedback: 'Apelido dado por Ulysses Guimarães pela amplitude dos direitos garantidos aos brasileiros.' },
+  { q: 'Qual plano econômico controlou a hiperinflação no governo FHC?',
+    opts: ['Plano Cruzado', 'Plano Bresser', 'Plano Collor', 'Plano Real'], correct: 3,
+    feedback: 'O Plano Real foi lançado em 1994 e criou a moeda atual, controlando décadas de hiperinflação.' },
+];
+
+const FICHAS_DATA = [
+  { frente: 'Capitanias hereditárias',     verso: 'Divisão colonial em 15 faixas doadas a fidalgos portugueses para colonizar. Adotadas a partir de 1534.' },
+  { frente: 'Quilombo dos Palmares',        verso: 'Maior quilombo do Brasil, no atual Alagoas. Liderado por Zumbi, destruído em 1694.' },
+  { frente: 'Inconfidência Mineira (1789)', verso: 'Conspiração contra Portugal motivada pelos impostos. Tiradentes foi o único enforcado, em 1792.' },
+  { frente: 'Proclamação da Independência', verso: '7 de setembro de 1822. D. Pedro I, Ipiranga. Brasil virou Império independente.' },
+  { frente: 'Abolicionismo',                verso: 'Movimento pelo fim da escravidão. Destaque: José do Patrocínio, Joaquim Nabuco, André Rebouças.' },
+  { frente: 'Tenentismo (anos 1920)',       verso: 'Jovens militares contra a República Velha oligárquica. Coluna Prestes percorreu 25 mil km.' },
+  { frente: 'Estado Novo (1937–1945)',      verso: 'Ditadura de Vargas com traços fascistas. Congresso fechado, censura, mas criou a CLT.' },
+  { frente: 'Diretas Já (1983–1984)',       verso: 'Campanha por eleições diretas. Milhões nas ruas, mas a emenda foi rejeitada no Congresso.' },
+  { frente: 'Impeachment',                  verso: 'Afastamento de presidente por crime de responsabilidade. Brasil: Collor (1992) e Dilma (2016).' },
+  { frente: 'Coronelismo',                  verso: 'Sistema da República Velha: grandes proprietários controlavam eleições pelo voto de cabresto.' },
+  { frente: 'Plano Real (1994)',            verso: 'Criou o Real e controlou a hiperinflação. Projetou Fernando Henrique Cardoso à presidência.' },
+  { frente: 'Constituição de 1988',         verso: '"Constituição Cidadã", promulgada em 5 de outubro. Criou o SUS, o STJ e o MP independente.' },
+];
+
+let histQuiz = null;
+
+function shuffleArr(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderTimeline() {
+  const el = document.getElementById('tab-timeline');
+  el.innerHTML = TIMELINE_DATA.map((item, i) => `
+    <div class="tl-item" data-tl="${i}">
+      <div class="tl-period">${item.periodo}</div>
+      <div class="tl-title">${item.titulo}<span class="tl-arrow">▶</span></div>
+      <div class="tl-detail">${item.detalhe}</div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.tl-item').forEach(item => {
+    item.addEventListener('click', () => item.classList.toggle('open'));
+  });
+}
+
+function renderFichas() {
+  const el = document.getElementById('tab-fichas');
+  el.innerHTML = '<div class="fichas-grid">' + FICHAS_DATA.map((f, i) => `
+    <div class="ficha" data-fc="${i}">
+      <div class="ficha-inner">
+        <div class="ficha-front">${f.frente}<span class="ficha-hint">toque para virar</span></div>
+        <div class="ficha-back">${f.verso}</div>
+      </div>
+    </div>
+  `).join('') + '</div>';
+  el.querySelectorAll('.ficha').forEach(f => {
+    f.addEventListener('click', () => f.classList.toggle('flipped'));
+  });
+}
+
+function initQuiz() {
+  histQuiz = { questions: shuffleArr(QUIZ_BANK).slice(0, 6), current: 0, score: 0 };
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const el = document.getElementById('tab-quiz');
+  const q = histQuiz.questions[histQuiz.current];
+  const total = histQuiz.questions.length;
+  el.innerHTML = `
+    <div class="quiz-progress">Pergunta ${histQuiz.current + 1} de ${total} · Acertos: ${histQuiz.score}</div>
+    <div class="quiz-q">
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((opt, i) => `<button class="quiz-opt" data-idx="${i}">${opt}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+    </div>
+    <button id="quiz-next-btn">${histQuiz.current + 1 < total ? 'Próxima ➤' : 'Ver resultado 🏆'}</button>
+  `;
+  el.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chosen = parseInt(btn.dataset.idx);
+      el.querySelectorAll('.quiz-opt').forEach(b => {
+        b.disabled = true;
+        if (parseInt(b.dataset.idx) === q.correct) b.classList.add('correct');
+      });
+      if (chosen !== q.correct) btn.classList.add('wrong'); else histQuiz.score++;
+      const fb = document.getElementById('quiz-feedback');
+      fb.textContent = (chosen === q.correct ? '✅ Correto! ' : '❌ Incorreto. ') + q.feedback;
+      fb.classList.add('visible');
+      document.getElementById('quiz-next-btn').classList.add('visible');
+    });
+  });
+  document.getElementById('quiz-next-btn').addEventListener('click', () => {
+    histQuiz.current++;
+    if (histQuiz.current >= histQuiz.questions.length) showQuizResult();
+    else renderQuizQuestion();
+  });
+}
+
+function showQuizResult() {
+  const { score, questions } = histQuiz;
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+  const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '😊' : '📚';
+  const msg   = pct >= 90 ? 'Excelente! Você arrasou!'
+              : pct >= 70 ? 'Muito bem! Continue assim!'
+              : pct >= 50 ? 'Bom esforço! Revisar ajuda!'
+              : 'Que tal rever a linha do tempo?';
+  const el = document.getElementById('tab-quiz');
+  el.innerHTML = `
+    <div id="quiz-result" class="visible">
+      <div class="qr-emoji">${emoji}</div>
+      <div class="qr-score">${score} / ${total}</div>
+      <div class="qr-label">${pct}% — ${msg}</div>
+      <button id="quiz-restart-btn">Jogar de novo 🔄</button>
+    </div>
+  `;
+  document.getElementById('quiz-restart-btn').addEventListener('click', initQuiz);
+}
+
+function openHistoriaPanel() {
+  document.querySelectorAll('.hist-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.hist-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector('.hist-tab[data-tab="timeline"]').classList.add('active');
+  document.getElementById('tab-timeline').classList.add('active');
+  document.getElementById('historia-panel').classList.add('visible');
+  document.getElementById('history-btn').classList.add('active');
+  renderTimeline();
+  renderFichas();
+  initQuiz();
+}
+
+function closeHistoriaPanel() {
+  document.getElementById('historia-panel').classList.remove('visible');
+  document.getElementById('history-btn').classList.remove('active');
+}
+
+document.getElementById('history-btn').addEventListener('click', openHistoriaPanel);
+document.getElementById('chat-back-btn').addEventListener('click', closeHistoriaPanel);
+
+document.querySelectorAll('.hist-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.hist-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.hist-tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
 </script>
 </body>
 </html>
